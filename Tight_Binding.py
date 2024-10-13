@@ -1,95 +1,92 @@
-# -*- coding: utf-8 -*-
-
-# Band structure and Density Of States calculation for a triangular lattice
-# in different cases of dimensionality and neighbor interaction
+# Band structure and Density Of States calculation for a triangular lattice in different cases of dimensionality and neighbor interaction
 
 import numpy as np
+import functions as func
 import matplotlib.pyplot as plt
-from math import pi, sqrt
 
-# parameters
-N = 200 #number of lattice sites
+
+
+'''
+Definition of working parameters
+'''
+N = 300 #number of lattice sites
 t1 = 1.0 # nearest neighbor hopping parameter
-t2 = 0.125 * t1 # next-nearest neighbor hopping parameter
-a = 1.0 #lattice constant
+t2 = 0.1 * t1 # next-nearest neighbor hopping parameter
+a = 5.0 #lattice constant
+eta = 0.01 # broading parameter of the gaussian that approximate delta function in DOS calculation
+bound = (-8,4) #energy values for DOS calculation and plotting
 
-#initialization of the wave vector for both the 1D and 2D cases
-k_vec = np.linspace(-pi/a, pi/a, N) # wave vector k
-kx_vec = np.linspace(-pi/a, pi/a, N) # x component of the wave vector k
-ky_vec = np.linspace(-pi/a, pi/a, N) # y component of the wave vector k
+'''
+Initialization of the wave vectors (1D & 2D)
+'''
+k_vec = np.linspace(-np.pi / a, np.pi / a , N) # wave vector k (1D case)
+kx_vec = np.linspace(-4 * np.pi / (3 * a), 4 * np.pi / (3 * a), N) # x component of the wave vector k (2D case)
+ky_vec = np.linspace(-4 * np.pi / (3 * a), 4 * np.pi / (3 * a), N) # y component of the wave vector k (2D case)
+kx_grid, ky_grid = np.meshgrid(kx_vec, ky_vec) # mesh grid for definition of the 2D energy array
 
 
-#Tight Binding model energy function for nearest neighbors 1D case 
-def TB_near_1D(k,t1,a):
-    return -2*t1*np.cos(k*a)
+'''
+Initialization of the energy bands
+'''
+energies_1D_nn = func.TB_1D_nn(k_vec, t1, a) # 1D nearest neighbors case
+energies_1D_nnn = func.TB_1D_nnn(k_vec, t1, t2, a) # 1D next-nearest neighbors case
+energies_2D_nn = func.TB_2D_nn(kx_grid, ky_grid, t1, a) # 2D nearest neighbors case
+energies_2D_nnn = func.TB_2D_nnn(kx_grid, ky_grid, t1, t2, a) # 2D next-nearest neighbors case
 
-#Tight Binding model energy function for next-nearest neighbors 1D case 
-def TB_next_1D(k,t1,t2,a):
-    return TB_near_1D(k,t1,a)-2*t2*np.cos(k*a)
 
-#Tight Binding model energy function for nearest neighbors 2D case 
-def TB_near_2D(kx,ky,t1,a):
-    return -2*t1*(np.cos(kx*a)+2*np.cos(kx*a/2)*np.cos(ky*a*sqrt(3)/2))
 
-#Tight Binding model energy function for next-nearest neighbors 2D case 
-def TB_next_2D(kx,ky,t1,t2,a):
-    return TB_near_2D(kx,ky,t1,a) - 2*t2*(np.cos(ky*a*sqrt(3))+2*np.cos(ky*a*sqrt(3)/2)*np.cos(ky*a*3/2))
+'''
+Initialization of the density of states (and range for plotting)
+'''
+range_1D_nn, DOS_1D_nn_values = func.DOS_1D_nn(t1, a, k_vec, eta, bound) # 1D nearest neighbors case
+range_1D_nnn, DOS_1D_nnn_values = func.DOS_1D_nnn(t1, t2, a, k_vec, eta, bound) # 1D next-nearest neighbors case
+range_2D_nn, DOS_2D_nn_values = func.DOS_2D_nn(t1, a, kx_grid, ky_grid, eta, bound) # 2D nearest neighbors case
+range_2D_nnn, DOS_2D_nnn_values = func.DOS_2D_nnn(t1, t2, a, kx_grid, ky_grid, eta, bound) # 2D next-nearest neighbors case
 
-#energy band for the 1D nearest neighbors case
-energies_1D_near = TB_near_1D(k_vec, t1, a)
 
-#energy band for the 1D next-nearest neighbors case
-energies_1D_next = TB_next_1D(k_vec, t1, t2, a)
 
-# plots of the energy bands for the 1D case
-fig, (near1D, next1D) = plt.subplots(1, 2, figsize=(10, 4))
 
-#nearest neighbors 1D case plot
-near1D.plot(k_vec, energies_1D_near, label=r'nearest neighbors 1D case', color='b')
-near1D.set_xlabel(r'wave vector k')
-near1D.set_ylabel(r'energy $\epsilon$(k)')
-near1D.legend()
+'''
+Plotting energy bands (1D)
+'''
+fig, ax = plt.subplots(figsize=(8, 6)) # figure & axis definition
+ax.plot(k_vec, energies_1D_nn, label=r'nearest neighbors 1D', color='b')  #plot of nn 1D band
+ax.plot(k_vec, energies_1D_nnn, label=r'next-nearest neighbors 1D', color='r') #plot of nnn 1D band
 
-#next-nearest neighbors 1D case plot
-next1D.plot(k_vec, energies_1D_next, label=r'next-nearest neighbors 1D case', color='b')
-next1D.set_xlabel(r'wave vector k')
-next1D.set_ylabel(r'energy $\epsilon$(k)')
-next1D.legend()
-
+ax.set_xlabel(r'Wave Vector $k$')
+ax.set_ylabel(r'Energy $\epsilon(k)$')
+ax.set_xlim(-np.pi/a, np.pi/a) # setting graph limits
+ax.axvline(x=0, color='black', linestyle='-', linewidth=0.5)
+ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+xticks = [-np.pi/a, -np.pi/(2*a), 0, np.pi/(2*a), np.pi/a]  #ticks at ±π/a and ±π/2a
+xtick_labels = [r'$-\pi/a$', r'$-\pi/2a$', '0', r'$+\pi/2a$', r'$+\pi/a$']
+ax.tick_params(axis='x', direction='in') # ticks set inside the graph
+ax.tick_params(axis='y', direction='in')
+ax.set_xticks(xticks)  # Set the ticks and labels on the x-axis
+ax.set_xticklabels(xtick_labels)
+ax.set_title('Energy Bands for 1D Case')
+ax.legend()
 plt.tight_layout()
 plt.show()
 
 
-#energy band for the 2D nearest neighbors case
-energies_2D_near = np.zeros((N,N))
-for i, kx in enumerate(kx_vec):
-    for j, ky in enumerate(ky_vec):
-        energies_2D_near[i,j] = TB_near_2D(kx,ky,t1,a)
-
-#energy band for the 2D next-nearest neighbors case
-energies_2D_next = np.zeros((N,N))
-for i, kx in enumerate(kx_vec):
-    for j, ky in enumerate(ky_vec):
-        energies_2D_next[i,j] = TB_next_2D(kx,ky,t1,t2,a)
+#Add plots of energy bands 2D cases (NN & NNN) for high symmetry paths!!!
 
 '''
-#general check
-print(energies_2D_near)
-print(energies_2D_next)
+Plotting color map of energy bands for 2D case
 '''
+func.color_map(kx_grid, ky_grid, energies_2D_nn, 'NN') #Color map nearest neighbors
+func.color_map(kx_grid, ky_grid, energies_2D_nnn, 'NNN') #Color map next-nearest neighbors
 
-x1, y1 = np.meshgrid(kx_vec, ky_vec)
-plt.contourf(x1, y1, energies_2D_near, cmap="viridis")
-plt.colorbar(label="Energy $\epsilon(k_x, k_y)$")
-plt.xlabel("Wave vector $k_x$")
-plt.ylabel("Wave vector $k_y$")
-plt.title("Energy Band Structure for NN 2D")
-plt.show()
 
-x2, y2 = np.meshgrid(kx_vec, ky_vec)
-plt.contourf(x2, y2, energies_2D_next, cmap="viridis")
-plt.colorbar(label="Energy $\epsilon(k_x, k_y)$")
-plt.xlabel("Wave vector $k_x$")
-plt.ylabel("Wave vector $k_y$")
-plt.title("Energy Band Structure for NNN 2D")
-plt.show()
+'''
+Plotting color gradient of energy bands for 2D case
+'''
+func.dos_plotter(range_1D_nn, DOS_1D_nn_values, "DOS for 1D NN") #DOS 1D nearest neighbors
+
+func.dos_plotter(range_1D_nnn, DOS_1D_nnn_values, "DOS for 1D NNN") #DOS 1D next-nearest neighbors
+
+func.dos_plotter(range_2D_nn, DOS_2D_nn_values, "DOS for 2D NN") #DOS 2D nearest neighbors
+
+func.dos_plotter(range_2D_nnn, DOS_2D_nnn_values,"DOS for 2D NNN") #DOS 2D next-nearest neighbors
+
