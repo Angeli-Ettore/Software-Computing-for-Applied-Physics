@@ -4,17 +4,16 @@ import numpy as np
 import functions as func
 import matplotlib.pyplot as plt
 
-
-
 '''
 Definition of working parameters
 '''
-N = 300 #number of lattice sites
+N = 800 #number of lattice sites
 t1 = 1.0 # nearest neighbor hopping parameter
-t2 = 0.1 * t1 # next-nearest neighbor hopping parameter
+t2 = 0.5 * t1 # next-nearest neighbor hopping parameter
 a = 5.0 #lattice constant
 eta = 0.01 # broading parameter of the gaussian that approximate delta function in DOS calculation
-bound = (-8,4) #energy values for DOS calculation and plotting
+bounds = [-8,4] #energy values for DOS calculation and plotting
+method = 1 #method for approximating Dirac's delta in DOS calculation (1=gaussian, 2=lorentzian)
 
 '''
 Initialization of the wave vectors (1D & 2D)
@@ -24,6 +23,10 @@ kx_vec = np.linspace(-4 * np.pi / (3 * a), 4 * np.pi / (3 * a), N) # x component
 ky_vec = np.linspace(-4 * np.pi / (3 * a), 4 * np.pi / (3 * a), N) # y component of the wave vector k (2D case)
 kx_grid, ky_grid = np.meshgrid(kx_vec, ky_vec) # mesh grid for definition of the 2D energy array
 
+'''
+definition of working parameter array "params"
+'''
+params = [0, t1, t2, a, N, eta, *bounds, method] # the first value allows to switch between the 4 possible cases, is fixed at 0 at the beginning
 
 '''
 Initialization of the energy bands
@@ -33,18 +36,20 @@ energies_1D_nnn = func.TB_1D_nnn(k_vec, t1, t2, a) # 1D next-nearest neighbors c
 energies_2D_nn = func.TB_2D_nn(kx_grid, ky_grid, t1, a) # 2D nearest neighbors case
 energies_2D_nnn = func.TB_2D_nnn(kx_grid, ky_grid, t1, t2, a) # 2D next-nearest neighbors case
 
-
-
 '''
 Initialization of the density of states (and range for plotting)
 '''
-range_1D_nn, DOS_1D_nn_values = func.DOS_1D_nn(t1, a, k_vec, eta, bound) # 1D nearest neighbors case
-range_1D_nnn, DOS_1D_nnn_values = func.DOS_1D_nnn(t1, t2, a, k_vec, eta, bound) # 1D next-nearest neighbors case
-range_2D_nn, DOS_2D_nn_values = func.DOS_2D_nn(t1, a, kx_grid, ky_grid, eta, bound) # 2D nearest neighbors case
-range_2D_nnn, DOS_2D_nnn_values = func.DOS_2D_nnn(t1, t2, a, kx_grid, ky_grid, eta, bound) # 2D next-nearest neighbors case
+params[0]=1 # 1D nearest neighbors case
+range_1D_nn, DOS_1D_nn_values = func.omni_DOS(params, k_vec, kx_grid, ky_grid)
 
+params[0]=2 # 1D next-nearest neighbors case
+range_1D_nnn, DOS_1D_nnn_values = func.omni_DOS(params, k_vec, kx_grid, ky_grid)
 
+params[0]=3 # 2D nearest neighbors case
+range_2D_nn, DOS_2D_nn_values = func.omni_DOS(params, k_vec, kx_grid, ky_grid)
 
+params[0]=4 # 2D next-nearest neighbors case
+range_2D_nnn, DOS_2D_nnn_values = func.omni_DOS(params, k_vec, kx_grid, ky_grid)
 
 '''
 Plotting energy bands (1D)
@@ -75,18 +80,18 @@ plt.show()
 '''
 Plotting color map of energy bands for 2D case
 '''
-func.color_map(kx_grid, ky_grid, energies_2D_nn, 'NN') #Color map nearest neighbors
-func.color_map(kx_grid, ky_grid, energies_2D_nnn, 'NNN') #Color map next-nearest neighbors
+func.color_map_plotter(kx_grid, ky_grid, energies_2D_nn, 'NN') #Color map nearest neighbors
+func.color_map_plotter(kx_grid, ky_grid, energies_2D_nnn, 'NNN') #Color map next-nearest neighbors
 
 
 '''
 Plotting color gradient of energy bands for 2D case
 '''
-func.dos_plotter(range_1D_nn, DOS_1D_nn_values, "DOS for 1D NN") #DOS 1D nearest neighbors
+func.dos_plotter(range_1D_nn, DOS_1D_nn_values, params, "DOS for 1D NN") #DOS 1D nearest neighbors
 
-func.dos_plotter(range_1D_nnn, DOS_1D_nnn_values, "DOS for 1D NNN") #DOS 1D next-nearest neighbors
+func.dos_plotter(range_1D_nnn, DOS_1D_nnn_values, params, "DOS for 1D NNN") #DOS 1D next-nearest neighbors
 
-func.dos_plotter(range_2D_nn, DOS_2D_nn_values, "DOS for 2D NN") #DOS 2D nearest neighbors
+func.dos_plotter(range_2D_nn, DOS_2D_nn_values, params, "DOS for 2D NN") #DOS 2D nearest neighbors
 
-func.dos_plotter(range_2D_nnn, DOS_2D_nnn_values,"DOS for 2D NNN") #DOS 2D next-nearest neighbors
+func.dos_plotter(range_2D_nnn, DOS_2D_nnn_values, params, "DOS for 2D NNN") #DOS 2D next-nearest neighbors
 
