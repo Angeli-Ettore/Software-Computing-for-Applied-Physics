@@ -1,187 +1,244 @@
 import numpy as np 
-import matplotlib.pyplot as plt
 
-
-def TB_1D_nn(k, t1, a):
+def high_symmetry_path(params):
     """
-    Computes the energy dispersion for a 1D tight-binding model with only nearest neighbors.
+    Generates the high-symmetry path in the Brillouin zone for a 2D tight-binding model.
 
     Parameters:
-    k (array): Wave vector values (1D array).
-    t1 (float): Nearest neighbor hopping parameter.
-    a (float): Lattice constant.
-
-    Returns:
-    array: Energy values corresponding to each wave vector in k.
-    """
-    return -2 * t1 * np.cos(k * a)
-
-def TB_1D_nnn(k, t1, t2, a):
-    """
-    Computes the energy dispersion for a 1D tight-binding model including both nearest 
-    and next-nearest neighbors.
-
-    Parameters:
-    k (array): Wave vector values (1D array).
-    t1 (float): Nearest neighbor hopping parameter.
-    t2 (float): Next-nearest neighbor hopping parameter.
-    a (float): Lattice constant.
-
-    Returns:
-    array: Energy values corresponding to each wave vector in k.
-    """
-    return TB_1D_nn(k, t1, a) - 2 * t2 * np.cos(k * a)
-
-def TB_2D_nn(kx, ky, t1, a):
-    """
-    Computes the energy dispersion for a 2D tight-binding model with only nearest neighbors.
-
-    Parameters:
-    kx (array): Wave vector values in the x-direction (2D grid).
-    ky (array): Wave vector values in the y-direction (2D grid).
-    t1 (float): Nearest neighbor hopping parameter.
-    a (float): Lattice constant.
-
-    Returns:
-    array: Energy values corresponding to each (kx, ky) pair in the grid.
-    """
-    return -2 * t1 * (np.cos(kx * a) + 2 * np.cos(kx * a / 2) * np.cos(ky * a * np.sqrt(3) / 2))
-
-def TB_2D_nnn(kx, ky, t1, t2, a):
-    """
-    Computes the energy dispersion for a 2D tight-binding model including both nearest 
-    and next-nearest neighbors.
-
-    Parameters:
-    kx (array): Wave vector values in the x-direction (2D grid).
-    ky (array): Wave vector values in the y-direction (2D grid).
-    t1 (float): Nearest neighbor hopping parameter.
-    t2 (float): Next-nearest neighbor hopping parameter.
-    a (float): Lattice constant.
-
-    Returns:
-    array: Energy values corresponding to each (kx, ky) pair in the grid.
-    """
-    return TB_2D_nn(kx, ky, t1, a) - 2 * t2 * (np.cos(ky * a * np.sqrt(3)) + 2 * np.cos(ky * a * np.sqrt(3) / 2) * np.cos(ky * a * 3 / 2))
-
-
-def color_map_plotter(kx, ky, energies, case):
-    """
-    Plots a color map for the energy bands based on wave vectors kx and ky.
-
-    Parameters:
-    kx (array): Wave vector values in the x-direction (2D grid).
-    ky (array): Wave vector values in the y-direction (2D grid).
-    energies (array): Energy values for each (kx, ky) pair.
-    case (str): Description of the case being plotted ("NN" or "NNN").
-
-    Returns:
-    None
-    """
-    plt.contourf(ky, kx, energies, cmap="viridis")  # 2D nearest neighbor case
-    plt.colorbar(label="Energy $\epsilon(k_x, k_y)$")
-    plt.xlabel("Wave Vector $k_x$")
-    plt.ylabel("Wave Vector $k_y$")
-    plt.title(f"Energy Band for 2D {case}")
-    plt.show()
-    return 
-
-def dos_plotter(x, y, params, label):
-    """
-    Plots the Density of States (DOS) based on energy values and the corresponding DOS values.
+    -----------
+    params : list
+        A list of parameters where:
+        - params[3]: Lattice constant 'a'.
+        - params[4]: Number of points in each segment of the high-symmetry path.
     
-    The function automatically determines the plotting method (Gaussian or Lorentzian) 
-    based on the parameter settings in `params`. It also sets up the plot labels, titles, 
-    and displays the graph.
+    Returns:
+    --------
+    kx_path : ndarray
+        The x-components of the wave vector along the high-symmetry path.
+    
+    ky_path : ndarray
+        The y-components of the wave vector along the high-symmetry path.
 
+    Notes:
+    ------
+    The path follows the sequence Γ -> M -> K -> Γ in the Brillouin zone.
+    """
+    G = [0, 0]
+    M = [np.pi / params[3], np.pi / (np.sqrt(3) * params[3])]
+    K = [4 * np.pi / (3 * params[3]), 0]
+
+    # Γ -> M
+    kx_segment1 = np.linspace(G[0], M[0], params[4])
+    ky_segment1 = np.linspace(G[1], M[1], params[4])
+    # M -> K
+    kx_segment2 = np.linspace(M[0], K[0], params[4])
+    ky_segment2 = np.linspace(M[1], K[1], params[4])
+    # K -> Γ
+    kx_segment3 = np.linspace(K[0], G[0], params[4])
+    ky_segment3 = np.linspace(K[1], G[1], params[4])
+    
+    kx_path = np.concatenate([kx_segment1, kx_segment2, kx_segment3])
+    ky_path = np.concatenate([ky_segment1, ky_segment2, ky_segment3])
+    return kx_path, ky_path
+
+
+def TB_1D(params, k):
+    """
+    Calculates the energy band for a one-dimensional (1D) tight-binding model.
+    
     Parameters:
-    x (array): An array of energy values over which the DOS is calculated.
-    y (array): An array of DOS values corresponding to each energy value in `x`.
-    params (list): A list of parameters used for DOS calculation.
-        - params[8] specifies the method for DOS calculation:
-            * 1: Gaussian method
-            * 2: Lorentzian method
-    label (str): A string label for the plot, typically describing the method or case.
+    -----------
+    params : list
+        A list of parameters where:
+        - params[0]: An integer representing the case (1 for NN, 2 for NNN).
+        - params[1]: The hopping parameter for nearest neighbors.
+        - params[2]: The hopping parameter for next-nearest neighbors (used when params[0] == 2).
+        - params[3]: Lattice constant 'a'.
+        
+    k : array-like
+        Wave vector values for the 1D system.
+        
+    Returns:
+    --------
+    energy_values : ndarray
+        The energy values corresponding to each wave vector.
+        
+    energy_label : str
+        A string label indicating the type of energy band (NN or NNN).
 
     Raises:
-    ValueError: If `params[8]` is not 1 or 2, indicating an invalid method value.
-
-    Returns:
-    None
+    -------
+    ValueError
+        If params[0] is not 1 or 2.
     """
-    plt.figure(figsize=(8, 6))
-    plt.plot(x, y, label=label)
-    plt.xlabel("Energy")
-    plt.ylabel("Density of States")
-    
-    if params[8] == 1:
-        plt.title(f"{label}: Gaussian method")
-    elif params[8] == 2:
-        plt.title(f"{label}: Lorentzian method")
+    energy_values = np.zeros_like(k)
+    if params[0]==1:
+        energy_values = -2 * params[1] * np.cos(k * params[3])
+        energy_label = "Energy band for 1D NN"
+    elif params[0]==2:
+        energy_values = -2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(k * params[3])
+        energy_label = "Energy band for 1D NNN"
     else:
-        raise ValueError("Error: when calling dos_plotter(), the method value is invalid. Must be 1 (Gaussian) or 2 (Lorentzian).")
-    
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+        raise ValueError("Error: when calling TB_1D(), the case value is invalid.")
+    return energy_values, energy_label
 
 
-def omni_DOS(params, k, k_x, k_y):
+def TB_2D(params, kx, ky):
     """
-    Computes the Density of States (DOS) based on the selected tight-binding model and 
-    energy range using either Gaussian or Lorentzian functions for the Dirac delta approximation.
-
+    Calculates the energy band for a two-dimensional (2D) tight-binding model.
+    
     Parameters:
-    params (list): List of parameters as follows:
-        - params[0] (int): Case identifier (1=1Dnn, 2=1Dnnn, 3=2Dnn, 4=2Dnnn).
-        - params[1] (float): Nearest neighbor hopping parameter (t1).
-        - params[2] (float): Next-nearest neighbor hopping parameter (t2).
-        - params[3] (float): Lattice constant (a).
-        - params[4] (int): Number of lattice points (N).
-        - params[5] (float): Width parameter (eta for Gaussian, gamma for Lorentzian).
-        - params[6] (float): Lower limit of energy range.
-        - params[7] (float): Upper limit of energy range.
-        - params[8] (int): Method for Dirac delta approximation (1=Gaussian, 2=Lorentzian).
-    k (array): Wave vector values for 1D cases.
-    k_x (array): Wave vector values in the x-direction (2D cases).
-    k_y (array): Wave vector values in the y-direction (2D cases).
+    -----------
+    params : list
+        A list of parameters where:
+        - params[0]: An integer representing the case (3 for NN, 4 for NNN).
+        - params[1]: The hopping parameter for nearest neighbors.
+        - params[2]: The hopping parameter for next-nearest neighbors (used when params[0] == 4).
+        - params[3]: Lattice constant 'a'.
+        
+    kx : array-like
+        Wave vector values in the x-direction.
+        
+    ky : array-like
+        Wave vector values in the y-direction.
+        
+    Returns:
+    --------
+    energy_values : ndarray
+        The energy values corresponding to each (kx, ky) pair.
+        
+    energy_label : str
+        A string label indicating the type of energy band (NN or NNN).
 
     Raises:
-    ValueError:  when calling omni_DOS(), the case value is invalid. Must be between 1 and 4.")
-
-    Returns:
-    tuple: A tuple containing:
-        - rng (array): Energy range values.
-        - dos (array): Computed DOS values corresponding to the energy range.
+    -------
+    ValueError
+        If params[0] is not 3 or 4.
     """
-    rng = np.linspace(params[6], params[7], params[4])  # Energy values for which the DOS is calculated
-    dos = np.zeros(params[4])
+    energy_values = np.zeros_like(kx)
+    if params[0]==3:
+        energy_values = -2 * params[1] * (np.cos(kx * params[3]) + 2 * np.cos(kx * params[3] / 2) * np.cos(ky * params[3] * np.sqrt(3) / 2))
+        energy_label = "Energy band for 2D NN"
+    elif params[0]==4:
+        energy_values = -2 * params[1] * (np.cos(kx * params[3]) + 2 * np.cos(kx * params[3] / 2) * np.cos(ky * params[3] * np.sqrt(3) / 2)) - 2 * params[2] * (np.cos(ky * params[3] * np.sqrt(3)) + 2 * np.cos(ky * params[3] * np.sqrt(3) / 2) * np.cos(ky * params[3] * 3 / 2))
+        energy_label = "Energy band for 2D NNN"
+    else:
+        raise ValueError("Error: when calling TB_2D(), the case value is invalid.")
+    return energy_values, energy_label
+    
 
+def DOS_1D(params, energies):
+    """
+    Calculates the density of states (DOS) for a one-dimensional (1D) tight-binding model.
+    
+    Parameters:
+    -----------
+    params : list
+        A list of parameters where:
+        - params[0]: An integer representing the case (1 for NN, 2 for NNN).
+        - params[4]: The number of points for the DOS calculation.
+        - params[5]: Broadening factor (used for Gaussian or Lorentzian smoothing).
+        - params[6]: Minimum energy value for the DOS calculation range.
+        - params[7]: Maximum energy value for the DOS calculation range.
+        - params[8]: String specifying the broadening method ("gaussian" or "lorentzian").
+        
+    energies : array-like
+        Energy values for which the DOS will be calculated.
+        
+    Returns:
+    --------
+    dos_range : ndarray
+        The energy range for which the DOS is calculated.
+        
+    dos_values : ndarray
+        The DOS values corresponding to the energy range.
+        
+    dos_label : str
+        A string label indicating the type of DOS (NN or NNN).
+
+    Raises:
+    -------
+    ValueError
+        If params[0] is not 1 or 2.
+        If params[8] is not "gaussian" or "lorentzian".
+    """
+    dos_range = np.linspace(params[6], params[7], params[4])  # Energy values for which the DOS is calculated
+    dos_values = np.zeros(params[4])
+    dos_label = "miao"
+    
     if params[0] == 1:  # nearest neighbor case (1D)
-        energies = TB_1D_nn(k, params[1], params[3])
-    
+        dos_label = "DOS for 1D NN"
     elif params[0] == 2:  # next-nearest neighbor case (1D)
-        energies = TB_1D_nnn(k, params[1], params[2], params[3])             
-
-    elif params[0] == 3:  # nearest neighbor case (2D)
-        energies = TB_2D_nn(k_x, k_y, params[1], params[3]).flatten()
-
-    elif params[0] == 4:  # next-nearest neighbor case (2D)
-        energies = TB_2D_nnn(k_x, k_y, params[1], params[2], params[3]).flatten()
-        
+        dos_label = "DOS for 1D NNN"
     else:
-        raise ValueError("Error: when calling omni_DOS(), the case value is invalid. Must be between 1 and 4.")
+        raise ValueError("Error: when calling DOS_1D(), the case value is invalid.")
 
-    for i, E in enumerate(rng):
-        if params[8] == 1:  # Gaussian case
+    for i, E in enumerate(dos_range):
+        if params[8] == "gaussian":  # Gaussian approximation
             weights = np.exp(-((E - energies) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
-        
-        elif params[8] == 2:  # Lorentzian case
+        elif params[8] == "lorentzian":  # Lorentzian approximation
             weights = (params[5] / np.pi) / ((E - energies) ** 2 + params[5] ** 2)
-        
         else:
-            raise ValueError("Error: Invalid approximation method specified. Choose either 1 (gaussian) or 2(lorentzian).")
+            raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
+        dos_values[i] = np.sum(weights) / (params[4] ** 2)
 
-        dos[i] = np.sum(weights) / (params[4] ** 2)
+    return dos_range, dos_values, dos_label
 
-    return rng, dos
+
+def DOS_2D(params, energies_mesh):
+    """
+    Calculates the density of states (DOS) for a two-dimensional (2D) tight-binding model.
+    
+    Parameters:
+    -----------
+    params : list
+        A list of parameters where:
+        - params[0]: An integer representing the case (3 for NN, 4 for NNN).
+        - params[4]: The number of points for the DOS calculation.
+        - params[5]: Broadening factor (used for Gaussian or Lorentzian smoothing).
+        - params[6]: Minimum energy value for the DOS calculation range.
+        - params[7]: Maximum energy value for the DOS calculation range.
+        - params[8]: String specifying the broadening method ("gaussian" or "lorentzian").
+        
+    energies_mesh : ndarray
+        A 2D array representing the energy values across the (kx, ky) grid.
+        
+    Returns:
+    --------
+    dos_range : ndarray
+        The energy range for which the DOS is calculated.
+        
+    dos_values : ndarray
+        The DOS values corresponding to the energy range.
+        
+    dos_label : str
+        A string label indicating the type of DOS (NN or NNN).
+
+    Raises:
+    -------
+    ValueError
+        If params[0] is not 3 or 4.
+        If params[8] is not "gaussian" or "lorentzian".
+    """
+    dos_range = np.linspace(params[6], params[7], params[4])  # Energy values for which the DOS is calculated
+    dos_values = np.zeros(params[4])
+    dos_label = "miao"    
+    energies = energies_mesh.flatten()
+    
+    if params[0] == 3:  # nearest neighbor case (2D)
+        dos_label = "DOS for 2D NN"
+    elif params[0] == 4:  # next-nearest neighbor case (2D)
+        dos_label = "DOS for 2D NNN"
+    else:
+        raise ValueError("Error: when calling DOS_2D(), the case value is invalid.")
+
+    for i, E in enumerate(dos_range):
+        if params[8] == "gaussian":  # Gaussian case
+            weights = np.exp(-((E - energies) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
+        elif params[8] == "lorentzian":  # Lorentzian case
+            weights = (params[5] / np.pi) / ((E - energies) ** 2 + params[5] ** 2)        
+        else:
+            raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
+        dos_values[i] = np.sum(weights) / (params[4] ** 2)
+
+    return dos_range, dos_values, dos_label
