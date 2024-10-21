@@ -1,6 +1,23 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import functions as calc
+import os
+
+
+# Set up global plot settings using rcParams
+plt.rcParams.update({
+    'lines.color': 'blue',             # Set default line color
+    'lines.linewidth': 2,            # Set default line width
+    'axes.labelsize': 12,            # Font size for axis labels
+    'axes.titlesize': 14,            # Font size for figure titles
+    'axes.grid': True,               # Enable grid by default
+    'xtick.direction': 'in',         # X-tick direction inside
+    'ytick.direction': 'in',         # Y-tick direction inside
+    'figure.figsize': (10, 5),       # Default figure size
+    'savefig.bbox': 'tight',         # Save figures with tight layout
+})
+
+
 
 def Energy_and_DOS_1D_plotter(params, k):
     """
@@ -30,43 +47,55 @@ def Energy_and_DOS_1D_plotter(params, k):
     energy_values, energy_label = calc.TB_1D(params, k)
     dos_range, dos_values, dos_label = calc.DOS_1D(params, energy_values)
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), gridspec_kw={'wspace': 0})
+    fig, (ax1, ax2) = plt.subplots(1, 2, gridspec_kw={'wspace': 0})
     
     # Plot on the first subplot
-    ax1.plot(k, energy_values, label = energy_label, color = 'red')
+    ax1.plot(k, energy_values, label = energy_label)
     ax1.set_xlabel(r"Wave Vector $k$")
     ax1.set_ylabel(r"Energy $\epsilon(k)$")
 
-    ax1.set_xlim(-np.pi/params[3], np.pi/params[3]) # setting graph limits
+    ax1.set_xlim(-np.pi/params[3]*1.1, np.pi/params[3]*1.1) # setting x limits
+    ax1.set_ylim(min(energy_values)-1, max(energy_values)+1) # setting y limits
+    
     xticks = [-np.pi/params[3], -np.pi/(2*params[3]), 0, np.pi/(2*params[3]), np.pi/params[3]]  #ticks at ±π/a and ±π/2a
     xtick_labels = [r'$-\pi/a$', r'$-\pi/2a$', '0', r'$+\pi/2a$', r'$+\pi/a$']
-    ax1.tick_params(axis='x', direction='in') # ticks set inside the graph
-    ax1.tick_params(axis='y', direction='in')
         
     ax1.set_xticks(xticks)  # Set the ticks and labels on the x-axis
     ax1.set_xticklabels(xtick_labels)
-
-    ax1.grid(True)
     ax1.legend()
+    
     
     # Plot on the second subplot
     ax2.plot(dos_values*1000, dos_range, color = 'red', label = dos_label)
     ax2.set_xlabel("Density of States")
     ax2.yaxis.set_ticks_position('right')  # Move ticks to the right
-    ax2.yaxis.set_label_position('right')  # Move the label to the right
-    ax2.set_ylabel(r"Energy $\epsilon(k)$")  # Set the label and add some padding for clarity
-    ax2.tick_params(axis='x', direction='in') # ticks set inside the graph
-    ax2.tick_params(axis='y', direction='in')
-    ax2.grid(True)
+
+    ax2.set_ylim(min(energy_values)-1, max(energy_values)+1) # setting y limits
+
     ax2.legend()
     
-    if params[0]==1:
-        fig.suptitle(f"Energy Band & Density of States in 1D (NN case: {params[8]})", fontsize=14)
-    elif params[0]==2:
-        fig.suptitle(f"Energy Band & Density of States in 1D (NNN case: {params[8]})", fontsize=14)
+    if params[0] == 1:
+        case = "NN"
+    elif params[0] == 2:
+        case = "NNN"
     else:
         raise ValueError("Error: when calling Energy_and_DOS_1D_plotter(), the case value is invalid.")
-        
+    
+    fig.suptitle(f"Energy Band & Density of States (1D {case}: {params[8]})", fontsize=14)
+
+    # Define the directory where the images will be saved
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    images_directory = os.path.join(current_directory, "Images")
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(images_directory):
+        os.makedirs(images_directory)
+    
+    # Save the plot using the 'label' variable
+    filename = f"EnergyBand_DOS_1D_{case}_{params[8]}.jpg"  # Create the filename using the label variable
+    save_path = os.path.join(images_directory, filename)
+    plt.savefig(save_path)  # Save the plot with tight layout    
+
     plt.show()
     return 
 
@@ -108,37 +137,51 @@ def Energy_and_DOS_2D_plotter(params, kx, ky):
     energy_values, energy_label = calc.TB_2D(params, kx, ky)
     dos_range, dos_values, dos_label = calc.DOS_2D(params, energy_values)
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), gridspec_kw={'wspace': 0})
+    fig, (ax1, ax2) = plt.subplots(1, 2, gridspec_kw={'wspace': 0})
     
     # Plot on the first subplot
-    ax1.plot(path, energy_path_values, color = 'red', label = energy_label)    
+    ax1.plot(path, energy_path_values, label = energy_label)    
     ax1.set_xticks([0, params[4], 2*params[4], 3*params[4]], path_label)
 
     ax1.set_xlabel(r"Wave Vector $k$")
     ax1.set_ylabel(r"Energy $\epsilon(k)$")
-    ax1.tick_params(axis='x', direction='in') # ticks set inside the graph
-    ax1.tick_params(axis='y', direction='in')
-    ax1.grid(True)
+    
+    ax1.set_ylim(min(energy_path_values)-1, max(energy_path_values)+1) # setting y limits
+
     ax1.legend()
     
     # Plot on the second subplot
     ax2.plot(dos_values, dos_range, color = 'red', label = dos_label)
     ax2.set_xlabel("Density of States")
     ax2.yaxis.set_ticks_position('right')  # Move ticks to the right
-    ax2.yaxis.set_label_position('right')  # Move the label to the right
-    ax2.set_ylabel(r"Energy $\epsilon(k)$")  # Set the label and add some padding for clarity
-    ax2.tick_params(axis='x', direction='in') # ticks set inside the graph
-    ax2.tick_params(axis='y', direction='in')
-    ax2.grid(True)
-    ax2.legend()
     
-    if params[0]==3:
-        fig.suptitle(f"Energy Band & Density of States in 2D (NN case: {params[8]})", fontsize=14)
-    elif params[0]==4:
-        fig.suptitle(f"Energy Band & Density of States in 2D (NNN case: {params[8]})", fontsize=14)
+    ax2.set_ylim(min(energy_path_values)-1, max(energy_path_values)+1) # setting y limits
+
+    ax2.legend(loc='lower right', bbox_to_anchor=(1, 0.05))
+    
+    if params[0] == 3:
+        case = "NN"
+    elif params[0] == 4:
+        case = "NNN"
     else:
         raise ValueError("Error: when calling Energy_and_DOS_2D_plotter(), the case value is invalid.")
+    
+    fig.suptitle(f"Energy Band & Density of States (2D {case}: {params[8]})", fontsize=14)
         
+    # Define the directory where the images will be saved
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    images_directory = os.path.join(current_directory, "Images")
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(images_directory):
+        os.makedirs(images_directory)
+    
+    # Save the plot using the 'label' variable
+    filename = f"EnergyBand_DOS_2D_{case}_{params[8]}.jpg"  # Create the filename using the label variable
+    save_path = os.path.join(images_directory, filename)
+    plt.savefig(save_path)  # Save the plot with tight layout    
+
+
     plt.show()
     return 
 
@@ -182,6 +225,23 @@ def color_map_plotter(params, kx, ky):
     plt.colorbar(label="Energy $\epsilon(k_x, k_y)$")
     plt.xlabel("Wave Vector $k_x$")
     plt.ylabel("Wave Vector $k_y$")
-    plt.title(f"Energy Band for 2D {case}")
+    
+    title = f"Energy Band for 2D {case}"
+    plt.title(title)
+
+    # Define the directory where the images will be saved
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    images_directory = os.path.join(current_directory, "Images")
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(images_directory):
+        os.makedirs(images_directory)
+    
+    # Save the plot using the 'label' variable
+    filename = f"{title}.jpg"  # Create the filename using the label variable
+    save_path = os.path.join(images_directory, filename)
+    plt.savefig(save_path)  # Save the plot with tight layout    
+
+    
     plt.show()
     return 

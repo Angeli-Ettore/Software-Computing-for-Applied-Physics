@@ -9,10 +9,10 @@ Definition of working parameters
 '''
 N = 500 #number of lattice sites
 t_nn = 1.0 # nearest neighbor hopping parameter
-t_nnn = 0.5 * t_nn # next-nearest neighbor hopping parameter
+t_nnn = 0.1 * t_nn # next-nearest neighbor hopping parameter
 a = 5.0 #lattice constant
 width = 0.01 # parameter of the gaussian\lorentzian that approximate delta function in DOS calculation
-bounds = [-15,4] #energy values for DOS calculation and plotting
+bounds = [-12,12] #energy values for DOS calculation and plotting
 method = "lorentzian" # method for approximating Dirac's delta in DOS calculation (use only gaussian or lorentzian)
 tempo = time() # used time for the entire code
 
