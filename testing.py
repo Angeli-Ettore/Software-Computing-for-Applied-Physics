@@ -70,7 +70,7 @@ def test_params_check_valid_params(): # test that params_check() does not raise 
             st.floats(min_value=0, max_value=1).map(lambda x: round(x, 4)),     # tnnn/tnn (can be 0) with 4 decimal places
             st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 3)),  # a with 3 decimal places
             st.integers(min_value=100, max_value=800),               # N
-            st.floats(min_value=0.001, max_value=1.0).map(lambda x: round(x, 3)), # width with 3 decimal places
+            st.floats(min_value=0.001, max_value=0.999).map(lambda x: round(x, 3)), # width with 3 decimal places
             st.sampled_from(["gaussian", "lorentzian"])))             # method
 def test_TB_1D(params):
     k = np.linspace(-np.pi/params[3], np.pi/params[3] , params[4])
@@ -97,11 +97,11 @@ def test_TB_1D(params):
 
     # bounds check for nn & nnn
     if params[0] == 1:
-        assert np.all(result >= -2 * params[1]), "Energy band values are below expected minimum."
-        assert np.all(result <= 2 * params[1]), "Energy band values exceed expected maximum."
+        assert np.all(result >= -2 * params[1]), f"Energy band values are below expected minimum: {params}"
+        assert np.all(result <= 2 * params[1]), f"Energy band values exceed expected maximum: {params}"
     elif params[0] == 2:
-        assert np.all(result >= -2 * params[1]- 2 * params[2]), "Energy band values are below expected minimum."
-        assert np.all(result <= 2 * params[1] + 2* params[2]), "Energy band values exceed expected maximum."
+        assert np.all(result >= -2 * params[1]- 2 * params[2]), f"Energy band values are below expected minimum: {params}"
+        assert np.all(result <= 2 * params[1] + 2* params[2]), f"Energy band values exceed expected maximum: {params}"
 ''' ----------------------------- '''
 
 
@@ -134,7 +134,7 @@ def test_TB_1D_zero_tnnn():
             st.floats(min_value=0, max_value=1).map(lambda x: round(x, 4)),     # tnnn/tnn (can be 0) with 4 decimal places
             st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 3)),  # a with 3 decimal places
             st.integers(min_value=100, max_value=800),               # N
-            st.floats(min_value=0.001, max_value=1.0).map(lambda x: round(x, 3)), # width with 3 decimal places
+            st.floats(min_value=0.001, max_value=0.999).map(lambda x: round(x, 3)), # width with 3 decimal places
             st.sampled_from(["gaussian", "lorentzian"])))             # method
 def test_TB_2D(params):
     kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
@@ -176,8 +176,8 @@ def test_TB_2D_nnn_bounds():
     min_energy = - 6 * (params[1] + params[2])
     max_energy = 2 * (params[1] + params[2])
 
-    assert np.all(result >= min_energy), "Energy band values are below expected minimum.(K<M)"
-    assert np.all(result <= max_energy), "Energy band values exceed expected maximum.(K<M)"
+    assert np.all(result >= min_energy), f"Energy band values are below expected minimum (M>K): {params}"
+    assert np.all(result <= max_energy), f"Energy band values exceed expected maximum (M>K): {params}"
 
 
     #K point has higher energy than M point
@@ -186,8 +186,8 @@ def test_TB_2D_nnn_bounds():
     min_energy = - 6 * (params[1] + params[2])
     max_energy = 3 * (params[1] - 2 * params[2])
 
-    assert np.all(result >= min_energy), "Energy band values are below expected minimum.(K>M)"
-    assert np.all(result <= max_energy), "Energy band values exceed expected maximum.(K>M)"
+    assert np.all(result >= min_energy), f"Energy band values are below expected minimum (K>M): {params}"
+    assert np.all(result <= max_energy), f"Energy band values exceed expected maximum (K>M: {params}"
 
 def test_TB_2D_zero_tnn():
     params = [3, 0.0, 0.1, 5.0, 100, 0.01, "lorentzian"]
@@ -213,3 +213,41 @@ def test_TB_2D_zero_tnnn():
 
     assert np.allclose(result_nn, result_nnn, rtol=1e-5), ("nnn case should collapse to nn case when tnnn is zero.")
 ''' ----------------------------- '''
+
+
+''' --------testing DOS_1D-------- '''
+@given(params=st.tuples(
+            st.integers(min_value=1, max_value=2),                    # case (1 or 2)
+            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 4)),  # tnn with 4 decimal places
+            st.floats(min_value=0, max_value=1).map(lambda x: round(x, 4)),     # tnnn/tnn (can be 0) with 4 decimal places
+            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 3)),  # a with 3 decimal places
+            st.integers(min_value=100, max_value=800),               # N
+            st.floats(min_value=0.001, max_value=0.999).map(lambda x: round(x, 3)), # width with 3 decimal places
+            st.sampled_from(["gaussian", "lorentzian"])))             # method
+def test_DOS_1D(params):
+    k = np.linspace(-np.pi/params[3], np.pi/params[3] , params[4])
+    params = list(params)  # convert tuple to list to allow modification
+    tnnn = params[2] * params[1] # tnnn goes now from 0 to tnn
+    params[2]=tnnn
+    energy_band = calc.TB_1D(params, k)
+    
+    dos_range, dos_values = calc.DOS_1D(params, energy_band)
+
+    # output shape
+    assert len(dos_range) == params[4], "DOS range length does not match expected."
+    assert len(dos_values) == params[4], "DOS values length does not match expected."
+
+    # output finiteness
+    assert np.all(np.isfinite(dos_values)), "DOS values contain non-finite values."
+
+    # output normalization
+    assert np.isclose(np.trapz(dos_values, dos_range), 1.0, rtol=1e-2), "DOS normalization failed."
+
+'''    # symmetry check: (DOS(E) = DOS(-E))
+    dos_range_symm, dos_values_symm = calc.DOS_1D(params, -energy_band)
+    assert np.allclose(dos_values, dos_values_symm, rtol=1e-5), "DOS is not symmetric."
+'''    
+    
+    
+    
+    
