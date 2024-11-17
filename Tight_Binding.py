@@ -5,15 +5,16 @@ import plots as plot
 import calculations as calc
 from time import time
 
-
-#Definition of working parameters
-t_nn = 1.0 # nearest neighbor hopping parameter
+''' --------definition of working parameters-------- '''
+t_nn = 0.5 # nearest neighbor hopping parameter
 t_nnn = 0.5 * t_nn # next-nearest neighbor hopping parameter
-a = 5.0 #lattice constant
-N = 800 #number of lattice sites
+a = 1.0 #lattice constant
+N = 1000 #number of lattice sites
 width = 0.01 # parameter of the gaussian\lorentzian that approximate delta function in DOS calculation
 method = "lorentzian" # method for approximating Dirac's delta in DOS calculation (use only gaussian or lorentzian)
 tempo = time() # used time for the entire code
+''' ------------------------------------------------ '''
+
 
 #definition of working parameter list "params"
 params = [0, t_nn, t_nnn, a, N, width, method] 
@@ -26,7 +27,7 @@ bound_1D =  np.pi / params[3] #dimension of the 1D bound (linear case)
 bound_2D = (4 * np.pi) / params[3] #dimension of the 2D bound (hexagonal case)
 tr_to_sq_factor = 2/np.sqrt(3) #normalization factor needed for triangular FBZ for plotting
 
-#Initialization of the wave vectors (1D & 2D)
+#initialization of the wave vectors (1D & 2D)
 k_vec = np.linspace(-bound_1D, bound_1D , params[4]) # wave vector (1D case)
 
 kx_vec = np.linspace(-bound_2D, bound_2D, params[4]) # wave vector x component (2D case)

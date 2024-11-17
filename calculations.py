@@ -4,20 +4,20 @@ def params_check(params):
     if not params: # check if the list is empty
         raise ValueError("Parameter list is empty. Please initialize the sequence of paramters.")
     
-    if params[1] <= 0: #check if tnn is positive
+    if params[1] < 0: #check if 'tnn' is positive
         raise ValueError("Nearest neighbor hopping parameter is invalid. Please insert a positive value.")
     
-    if params[2] <= 0 or params[2] > params[1]: #check if tnnn is positive and less than tnn
+    if params[2] < 0 or params[2] >= params[1]: #check if 'tnnn' is positive and less or equal to tnn
         raise ValueError("Next-nearest neighbor hopping parameter is invalid. Please insert a positive value, which is less than the nearest neighbor hopping parameter.")
 
-    if params[3] <= 0: # check if a is positive
+    if params[3] <= 0: # check if 'a' is positive
         raise ValueError("Lattice parameter is invalid. Please insert a positive value.")
 
-    if not isinstance(params[4], int): # check if N is an integer
+    if not isinstance(params[4], int): # check if 'N' is an integer
         raise ValueError("Number of lattice points is invalid. Please insert a positive integer value.")
 
-    if params[4] <= 0: # check if N is positive
-        raise ValueError("Number of lattice points is invalid. Please insert a positive integer value.")
+    if params[4] <= 99: # check if 'N' is positive and greater than 99
+        raise ValueError("Number of lattice points is invalid. Please insert a positive integer higher than 99.")
 
     if params[5] >= 1 or params[5] <= 0: # check if the width of the gaussian/lorentzian is valid
         raise ValueError("Width of the Gaussian/Lorentzian is invalid. Please insert a positive value which is less than 1.")
@@ -25,24 +25,32 @@ def params_check(params):
     if params[6] != "gaussian" and params[6] != "lorentzian": #check if the method string is valid 
         raise ValueError("Method for DOS calculation is invalid. Please insert either 'gaussian' or 'lorentzian'.")
 
-    print("List of inserted parameters is valid. The calculation will start now!")
+    print("List of inserted parameters is valid:\n"
+        f"tnn = {params[1]}\n"
+        f"tnnn = {params[2]}\n"
+        f"a = {params[3]}\n"
+        f"N = {params[4]}\n"
+        f"width = {params[5]}\n"
+        f"method = {params[6]}\n"
+        "the calculation will start now..."
+    ) 
     return
 
 
 def hexagonal_contour(params, kx, ky, bound):
     # Define the boundary lines for the hexagon with required size 
-    if bound >= 0:
+    if not isinstance(params[4], int): # check if N is an integer
+        raise ValueError("Error when calling function hexagonal_contour(). Please insert an integer value for the bound.")
+    elif bound >= 0:
         contour1 = ky <= -np.sqrt(3) * (kx - bound)
         contour2 = ky >= -np.sqrt(3) * (kx + bound)
         contour3 = ky >= np.sqrt(3) * (kx - bound)
         contour4 = ky <= np.sqrt(3) * (kx + bound)
         contour5 = np.abs(ky) <= bound
         
-        # Define the hexagon
-        hexagon = contour1 & contour2 & contour3 & contour4 & contour5
+        hexagon = contour1 & contour2 & contour3 & contour4 & contour5 # Define the hexagon
     else:
         raise ValueError("Error when calling function hexagonal_contour(). Please insert a positive value for the bound.")
-
     return hexagon
 
 
