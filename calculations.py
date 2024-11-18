@@ -7,7 +7,7 @@ def params_check(params):
     if params[1] < 0: #check if 'tnn' is positive
         raise ValueError("Nearest neighbor hopping parameter is invalid. Please insert a positive value.")
     
-    if params[2] < 0 or params[2] >= params[1]: #check if 'tnnn' is positive and less or equal to tnn
+    if params[2] < 0 or params[2] > params[1]: #check if 'tnnn' is positive and less or equal to tnn
         raise ValueError("Next-nearest neighbor hopping parameter is invalid. Please insert a positive value, which is less than the nearest neighbor hopping parameter.")
 
     if params[3] <= 0: # check if 'a' is positive
@@ -204,20 +204,21 @@ def DOS_1D(params, energy_values):
     dos_range = np.linspace(min(energy_values)*1.1, max(energy_values)*1.1, params[4])  # Energy values for which the DOS is calculated
     dos_values = np.zeros(params[4])
     
-
-    for i, E in enumerate(dos_range):
-        if params[6] == "gaussian":  # Gaussian approximation
-            weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
-        elif params[6] == "lorentzian":  # Lorentzian approximation
-            weights = (params[5] / np.pi) / ((E - energy_values) ** 2 + params[5] ** 2)
-        else:
-            raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
-        dos_values[i] = np.sum(weights) / (params[4] ** 2)
-
-    # Normalization of DOS using trapezoidal integration
-    total_area = np.trapz(dos_values, dos_range)
-    dos_values /= total_area
-
+    if params[1] != 0:
+        for i, E in enumerate(dos_range):
+            if params[6] == "gaussian":  # Gaussian approximation
+                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
+            elif params[6] == "lorentzian":  # Lorentzian approximation
+                weights = (params[5] / np.pi) / ((E - energy_values) ** 2 + params[5] ** 2)
+            else:
+                raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
+            dos_values[i] = np.sum(weights) / (params[4] ** 2)
+    
+        # Normalization of DOS using trapezoidal integration
+        total_area = np.trapz(dos_values, dos_range)
+        dos_values /= total_area
+    else:
+       print("0 nearest neighbor hopping parameter define 0 Density of States.")     
     return dos_range, dos_values
 
 
@@ -254,18 +255,20 @@ def DOS_2D(params, energy_mesh):
     dos_range = np.linspace(min(energy_values)*1.1,max(energy_values)*1.1, params[4])  # Energy values for which the DOS is calculated
     dos_values = np.zeros(params[4])
     
-
-    for i, E in enumerate(dos_range):
-        if params[6] == "gaussian":  # Gaussian case
-            weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
-        elif params[6] == "lorentzian":  # Lorentzian case
-            weights = (params[5] / np.pi) / ((E - energy_values) ** 2 + params[5] ** 2)        
-        else:
-            raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
-        dos_values[i] = np.sum(weights) / (params[4] ** 2)
-
-    # Normalization of DOS using trapezoidal integration
-    total_area = np.trapz(dos_values, dos_range)
-    dos_values /= total_area
+    if params[1] != 0:
+        for i, E in enumerate(dos_range):
+            if params[6] == "gaussian":  # Gaussian case
+                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
+            elif params[6] == "lorentzian":  # Lorentzian case
+                weights = (params[5] / np.pi) / ((E - energy_values) ** 2 + params[5] ** 2)        
+            else:
+                raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
+            dos_values[i] = np.sum(weights) / (params[4] ** 2)
+    
+        # Normalization of DOS using trapezoidal integration
+        total_area = np.trapz(dos_values, dos_range)
+        dos_values /= total_area
+    else:
+       print("0 nearest neighbor hopping parameter define 0 Density of States.")     
 
     return dos_range, dos_values
