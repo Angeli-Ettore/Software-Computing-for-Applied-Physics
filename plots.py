@@ -17,6 +17,16 @@ plt.rcParams.update({
 })
 
 def saving_pictures(filename):
+    '''
+    save a generated graph as pdf file with filename corresponding to its title.
+    Input:
+        filename : name of the generated file, title of the graph
+    Output:
+        none
+    Notes:
+        creates a folder 'Images' in th esame directory as the code, in which downloading the images.
+    '''
+
     # Define the directory where the images will be saved
     current_directory = os.path.dirname(os.path.abspath(__file__))
     images_directory = os.path.join(current_directory, "Images")
@@ -32,30 +42,20 @@ def saving_pictures(filename):
     return
 
 def Energy_and_DOS_1D_plotter(params, k, energy_values, dos_range, dos_values):
-    """
-    Plots the energy band and density of states (DOS) for a one-dimensional (1D) tight-binding model.
-    
-    Parameters:
-    -----------
-    params : list
-        A list of parameters required for the tight-binding calculation:
-        - params[0]: An integer representing the case (1 for NN, 2 for NNN).
-        - params[3]: Lattice constant 'a'.
-        - params[6]: A description of the case being used ("gaussian" or lorentzian"").
-        
-    k : array-like
-        Wave vector values for the 1D system.
-        
-    Returns:
-    --------
-    None
-        The function displays the plot but does not return any value.
-        
-    Notes:
-    ------
-    - This function raises a ValueError if `params[0]` is not 1 or 2.
-    - The plot includes the energy band and the density of states for the given parameters.
-    """    
+    '''
+    plots energy band and DOS in the tight-binding model (1D).
+    Input:
+        params : list
+            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
+            - params[3]: lattice constant 'a'.
+            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.        
+        k : array of the wave vector (1D)     
+    Output:
+        none (plots the graphs)
+    Raises:
+        ValueError
+            if params[0] is not 1 or 2.
+    '''
     fig, (ax1, ax2) = plt.subplots(1, 2, gridspec_kw={'wspace': 0})
     
     # Plot on the first subplot
@@ -94,34 +94,21 @@ def Energy_and_DOS_1D_plotter(params, k, energy_values, dos_range, dos_values):
     return 
 
 def Energy_and_DOS_2D_plotter(params, kx, ky, energy_values, dos_range, dos_values):
-    """
-    Plots the energy band along a high-symmetry path and the density of states (DOS) for a two-dimensional (2D) tight-binding model.
-    
-    Parameters:
-    -----------
-    params : list
-        A list of parameters required for the tight-binding calculation:
-        - params[0]: An integer representing the case (3 for NN, 4 for NNN).
-        - params[4]: Path length used for high-symmetry points.
-        - params[6]: A description of the case being used ("gaussian" or "lorentzian").
-        
-    kx : array-like
-        Wave vector values in the x-direction for the 2D system.
-        
-    ky : array-like
-        Wave vector values in the y-direction for the 2D system.
-        
-    Returns:
-    --------
-    None
-        The function displays the plot but does not return any value.
-        
-    Notes:
-    ------
-    - The function automatically sets high-symmetry points ('Γ', 'M', 'K', 'Γ') for the path.
-    - This function raises a ValueError if `params[0]` is not 3 or 4.
-    - The plot includes the energy band along the high-symmetry path and the density of states for the given parameters.
-    """
+    '''
+    plots energy band and DOS in the tight-binding model (2D).
+    Input:
+        params : list
+            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
+            - params[3]: lattice constant 'a'.
+            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.        
+        kx: array of the x component of the wave vector (2D)
+        ky: array of the y component of the wave vector (2D)
+    Output:
+        none (plots the graphs)
+    Raises:
+        ValueError
+            if params[0] is not 3 or 4.
+    '''
      
     kx_path, ky_path = calc.high_symmetry_path(params)
     energy_path_values = calc.TB_2D(params, kx_path, ky_path)
@@ -159,32 +146,22 @@ def Energy_and_DOS_2D_plotter(params, kx, ky, energy_values, dos_range, dos_valu
 
 
 def color_map_plotter(params, kx, ky, energy_values):
-    """
-    Plots a contour map for the energy bands of a two-dimensional (2D) tight-binding model based on wave vectors kx and ky.
-    
-    Parameters:
-    -----------
-    params : list
-        A list of parameters required for the tight-binding calculation:
-        - params[0]: An integer representing the case (3 for NN, 4 for NNN).
-        
-    kx : array-like
-        Wave vector values in the x-direction (2D grid).
-        
-    ky : array-like
-        Wave vector values in the y-direction (2D grid).
-        
-    Returns:
-    --------
-    None
-        The function displays the contour plot but does not return any value.
-        
-    Notes:
-    ------
-    - The color map uses a "viridis" colormap to represent the energy bands visually.
-    - This function raises a ValueError if `params[0]` is not 3 or 4.
-    - The plot includes a color bar that represents energy values for each (kx, ky) pair.
-    """
+    '''
+    plots color map of the energy band in the tight-binding model (2D).
+    Input:
+        params : list
+            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
+            - params[3]: lattice constant 'a'.
+            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.        
+        kx: array of the x component of the wave vector (2D)
+        ky: array of the y component of the wave vector (2D)
+        energies_values : 2D array of the energy band across the (kx,ky) grid 
+    Output:
+        none (plots the color map)
+    Raises:
+        ValueError
+            if params[0] is not 3 or 4.
+    '''
     if params[0] == 3:
         case = "NN"
     elif params[0] == 4:

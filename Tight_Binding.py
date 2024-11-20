@@ -16,28 +16,27 @@ tempo = time() # used time for the entire code
 ''' ------------------------------------------------ '''
 
 
-#definition of working parameter list "params"
+''' --------crafting and checking of params-------- '''
 params = [0, t_nn, t_nnn, a, N, width, method] 
-
-#check on the validity of the chosen parameters
 calc.params_check(params)
+''' ----------------------------------------------- '''
 
 
+''' --------definition of wave vectors (1D & 2D)-------- '''
 bound_1D =  np.pi / params[3] #dimension of the 1D bound (linear case)
 bound_2D = (4 * np.pi) / params[3] #dimension of the 2D bound (hexagonal case)
 tr_to_sq_factor = 2/np.sqrt(3) #normalization factor needed for triangular FBZ for plotting
 
-#initialization of the wave vectors (1D & 2D)
 k_vec = np.linspace(-bound_1D, bound_1D , params[4]) # wave vector (1D case)
 
 kx_vec = np.linspace(-bound_2D, bound_2D, params[4]) # wave vector x component (2D case)
 ky_vec = np.linspace(-bound_2D * tr_to_sq_factor, bound_2D * tr_to_sq_factor, params[4]) # wave vector y component (2D case)
 
-hexagon = calc.hexagonal_contour(params, kx_vec, ky_vec, bound_2D)
+hexagon = calc.hexagonal_contour(kx_vec, ky_vec, bound_2D)
 kx_grid, ky_grid = np.meshgrid(kx_vec[hexagon], ky_vec[hexagon]) # mesh grid of the wave vector (2D case)
+''' ---------------------------------------------------- '''
 
-
-#calculation and plotting of energy bands and DOS for each case
+''' --------calculation and plotting of energy bands and DOS-------- '''
 params[0] = 1 #1D NN case
 energy_values = calc.TB_1D(params, k_vec)
 dos_range, dos_values = calc.DOS_1D(params, energy_values)
@@ -66,7 +65,6 @@ dos_range, dos_values = calc.DOS_2D(params, energy_values)
 
 plot.Energy_and_DOS_2D_plotter(params, kx_grid, ky_grid, energy_values, dos_range, dos_values)
 plot.color_map_plotter(params, kx_grid, ky_grid, energy_values)
-
+''' ---------------------------------------------------------------- '''
 
 print(f"Code executed successfully in {time() - tempo:.2f} seconds!")
-
