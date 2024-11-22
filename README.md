@@ -74,4 +74,4 @@ g(\epsilon)_{lorentzian} = \sum_{\vec{k}} \frac{w}{\pi[(\epsilon - \epsilon_{\ve
 g(\epsilon)_{gaussian} = \sum_{\vec{k}} \frac{1}{w\sqrt{2\pi}} e^{\frac{(\epsilon - \epsilon_{\vec{k}})^2}{2w^2}}
 ```
 
-The code allows an user to play with various parameters; the two hopping parameters $t_{nn}$ & $t_{nnn}$, the lattice parameter $a$ and number of lattice points $N$, and the method to approximate the Dirac's delta, along with the width of the chosen function $w$.
+The code allows an user to play with various parameters; the two hopping parameters $t_{nn}$ & $t_{nnn}$, the lattice parameter $a$ and number of lattice points $N$, and the method to approximate the Dirac's delta, along with the width of the chosen function $w$. When given this set of working parameter, it compute the energy bands and Density of States for the 4 distinct cases and plot the results. In particular, for the **2D** case, it plots a color map of the energy band, along with a specific section of the band, that follow the high symmetry path $\Gamma -> K -> M -> \Gamma$. At last, the code generate a folder called "Images" in the same repository where the code is, with all the generated plots.
