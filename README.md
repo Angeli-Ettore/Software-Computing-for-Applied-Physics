@@ -73,3 +73,5 @@ g(\epsilon)_{lorentzian} = \sum_{\vec{k}} \frac{w}{\pi[(\epsilon - \epsilon_{\ve
 ```math
 g(\epsilon)_{gaussian} = \sum_{\vec{k}} \frac{1}{w\sqrt{2\pi}} e^{\frac{(\epsilon - \epsilon_{\vec{k}})^2}{2w^2}}
 ```
+
+The code allows an user to play with various parameters; the two hopping parameters $t_{nn}$ & $t_{nnn}$, the lattice parameter $a$ and number of lattice points $N$, and the method to approximate the Dirac's delta, along with the width of the chosen function $w$.
