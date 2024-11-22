@@ -45,12 +45,8 @@ The **2D** case, in particular the triangular lattice, has instead neighbors arr
 ![triangular lattice with highlighted nearest neighbors and next nearest neighbors](https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics/blob/main/triangular_lattice.png)
 
 In the picture are present the coordinates in real space of these points, along with stars that indicate the position of the high symmetry points, $K$, $M$ and $\Gamma$. 
-Due to the symmetry of these neighbors, the energy band cna be expressed as follows:
+Due to the symmetry of these neighbors, the energy band can be expressed as follows:
 
 ```math
-\epsilon_{k_x,k_y}^{nn} = -2 t_{nn} [cos(k_xa)+2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{a}{2})]
-```
-
-```math
-\epsilon_{k_x,k_y}^{nnn} = -2 t_{nn} [cos(k_y a \sqrt{3})+ 2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{3a}{2})]
+\epsilon_{k_x,k_y} = -2 t_{nn} [cos(k_xa)+2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{a}{2})] -2 t_{nn} [cos(k_y a \sqrt{3})+ 2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{3a}{2})]
 ```
