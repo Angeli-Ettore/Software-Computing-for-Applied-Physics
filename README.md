@@ -50,3 +50,6 @@ Due to the symmetry of these neighbors, the energy band can be expressed as foll
 ```math
 \epsilon_{k_x,k_y} = -2 t_{nn} [cos(k_xa)+2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{a}{2})] -2 t_{nn} [cos(k_y a \sqrt{3})+ 2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{3a}{2})]
 ```
+
+As one would expect, the shape of the energy band change dramatically when considering the effect of the next nearest neighbors. Moreover, the relative magnitude of the two hopping parameters, $t_{nn}$ and $t_{nnn}$, is the parameter that defines the energy band. In both the **1D** and **2D** cases, there exists a critical value of $\beta = t_{nnn}/t_{nn}$, for which the effect of the next nearest neighbor interaction is dominant enough to change the shape of the band.
+In the **1D** case, if $t_{nnn}<0.4*t_{nn}$ the absolute maxima appears at $k=\pm \pi / a$.
