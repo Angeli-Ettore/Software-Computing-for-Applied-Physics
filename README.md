@@ -52,4 +52,8 @@ Due to the symmetry of these neighbors, the energy band can be expressed as foll
 ```
 
 As one would expect, the shape of the energy band change dramatically when considering the effect of the next nearest neighbors. Moreover, the relative magnitude of the two hopping parameters, $t_{nn}$ and $t_{nnn}$, is the parameter that defines the energy band. In both the **1D** and **2D** cases, there exists a critical value of $\beta = t_{nnn}/t_{nn}$, for which the effect of the next nearest neighbor interaction is dominant enough to change the shape of the band.
-In the **1D** case, if $t_{nnn}<0.4*t_{nn}$ the absolute maxima appears at $k=\pm \pi / a$.
+
+In the **1D** case, if $4t_{nnn}<t_{nn}$ the absolute maxima appear at $k=\pm \pi / a$.
+If instead  $4t_{nnn}<t_{nn}$, the energy maxima appear when $cos(ka)=-t_{nn}/(4t_{nnn})$.
+
+Similarly, in the **2D** case, if $8t_{nnn}<t_{nn}$ the absolute maxima appear at the $K$ point, while if $8t_{nnn}>t_{nn}$ they appear at the $M$ point.
