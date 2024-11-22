@@ -26,3 +26,10 @@ Assuming that the eigenstates of the total hamiltonian are Bloch states, as foll
 ```math
 |\psi(\vec{k}) \rangle =\frac{1}{\sqrt{N}} \sum_{\vec{R}_i} e^{i \vec{k}\vec{R}_i} |\vec{R}_i\rangle
 ```
+
+Thanks to the normalization condition on the atomic states, one can express further the energy band as follows:
+
+```math
+\epsilon_{\vec{k}} = -t_{nn} \sum_{\vec{r}_{nn}} e^{i \vec{k}\vec{r}_{nn}} - t_{nnn} \sum_{\vec{r}_{nnn}} e^{i \vec{k}\vec{r}_{nnn}}
+```
+
