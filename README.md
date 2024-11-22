@@ -42,6 +42,15 @@ In the **1D** case, the 2 nearest neighbors are obviously at distance $\pm a$, w
 
 The **2D** case, in particular the triangular lattice, has instead neighbors arranged at the vertices of hexagons. To be precise, the 6 nearest neighbors are at a distance $a$ from each atom, while the 6 next nearest neighbors at a distance $\sqrt{3}a$. In the following picture is reported a sketch of a triangular lattice, with highlighted the 6 nn (purple) & the 6 nnn (green).
 
-![alt text](https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics/blob/main/triangular_lattice.png)
+![triangular lattice with highlighted nearest neighbors and next nearest neighbors](https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics/blob/main/triangular_lattice.png)
 
-Due to the symmetry of these neighbors, inserting the positions of these neighbors
+In the picture are present the coordinates in real space of these points, along with stars that indicate the position of the high symmetry points, $K$, $M$ and $\Gamma$. 
+Due to the symmetry of these neighbors, the energy band cna be expressed as follows:
+
+```math
+\epsilon_{k_x,k_y}^{nn} = -2 t_{nn} [cos(k_xa)+2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{a}{2})]
+```
+
+```math
+\epsilon_{k_x,k_y}^{nnn} = -2 t_{nn} [cos(k_y a \sqrt{3})+ 2cos(k_y \frac{a\sqrt{3}}{2}) cos(k_x \frac{3a}{2})]
+```
