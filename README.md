@@ -16,3 +16,4 @@ The atomic term is composed by a sum over all atomic states $|\vec{R}_i\rangle$;
 
 the atomic term in $\hat{H}$ represent just a rigid shift of the energy band; for simplicity I put this shift to 0.
 The hopping term contains instead a double sum; the energy contribution corresponds in fact to the interaction between each atom and its neighbors.
+In my code I take into account and compare two distinct configurations of the tight binding model; usually, the interaction between atomic neighbors tends to fall off rather rapidly, meaning that after few lattice parameters the interaction is comlpetely screened. For this reason I calculate the energy band and Density of States accounting for only nearest neighbor interaction (nn) and then also for next nearest neighbor interaction (nnn).
