@@ -197,12 +197,12 @@ def DOS_1D(params, energy_values):
     if params[1] != 0:
         for i, E in enumerate(dos_range):
             if params[6] == "gaussian":  # Gaussian approximation
-                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
+                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2))
             elif params[6] == "lorentzian":  # Lorentzian approximation
-                weights = (params[5] / np.pi) / ((E - energy_values) ** 2 + params[5] ** 2)
+                weights = 1 / ((E - energy_values) ** 2 + params[5] ** 2)
             else:
                 raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
-            dos_values[i] = np.sum(weights) / (params[4] ** 2)
+            dos_values[i] = np.sum(weights)
     
         # Normalization of DOS using trapezoidal integration
         total_area = np.trapz(dos_values, dos_range)
@@ -238,12 +238,12 @@ def DOS_2D(params, energy_mesh):
     if params[1] != 0:
         for i, E in enumerate(dos_range):
             if params[6] == "gaussian":  # Gaussian case
-                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2)) / (np.sqrt(np.pi) * params[5])
+                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2))
             elif params[6] == "lorentzian":  # Lorentzian case
-                weights = (params[5] / np.pi) / ((E - energy_values) ** 2 + params[5] ** 2)        
+                weights = 1 / ((E - energy_values) ** 2 + params[5] ** 2)        
             else:
                 raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
-            dos_values[i] = np.sum(weights) / (params[4] ** 2)
+            dos_values[i] = np.sum(weights)
     
         # Normalization of DOS using trapezoidal integration
         total_area = np.trapz(dos_values, dos_range)
