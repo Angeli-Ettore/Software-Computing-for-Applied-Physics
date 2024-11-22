@@ -174,7 +174,7 @@ def test_TB_1D(params):
     if params[0] == 1:
         expected = -2 * params[1] * np.cos(k * params[3])
     elif params[0] == 2:
-        expected = -2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(k * params[3])
+        expected = -2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(2* k * params[3])
     assert np.allclose(result, expected, rtol=1e-5), "Energy band does not match expected values."
 
     # symmetry check: E(k) == E(-k)
@@ -185,8 +185,12 @@ def test_TB_1D(params):
         assert np.all(result >= -2 * params[1]), f"Energy band values are below expected minimum: {params}"
         assert np.all(result <= 2 * params[1]), f"Energy band values exceed expected maximum: {params}"
     elif params[0] == 2:
-        assert np.all(result >= -2 * params[1]- 2 * params[2]), f"Energy band values are below expected minimum: {params}"
-        assert np.all(result <= 2 * params[1] + 2* params[2]), f"Energy band values exceed expected maximum: {params}"
+        if params[2]/params[1]>0.25:
+            assert np.all(result >= -2 * params[1] - 2 * params[2]), f"Energy band values are below expected minimum: {params}"
+            assert np.all(result <= params[2] * ((params[1]/(2*params[2]))**2 + 2)), f"Energy band values exceed expected maximum: {params}"
+        elif params[2]/params[1]<=0.25:
+            assert np.all(result >= - 2 * params[1] - 2 * params[2]), f"Energy band values are below expected minimum: {params}"
+            assert np.all(result <= 2 * params[1] - 2 * params[2]), f"Energy band values exceed expected maximum: {params}"
 ''' ----------------------------- '''
 
 
@@ -255,7 +259,7 @@ def test_TB_2D(params):
     '''
     kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
     ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(params, kx_start, ky_start, (4*np.pi)/params[3])
+    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
     kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
     
     
@@ -453,7 +457,7 @@ def test_DOS_2D_nn():
     params = [3, 2.071, 0.999, 1.721, 500, 0.01, "gaussian"] #2D nn case with gaussian approximation
     kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
     ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(params, kx_start, ky_start, (4*np.pi)/params[3])
+    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
     kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
 
     energy_band = calc.TB_2D(params, kx, ky)
@@ -481,7 +485,7 @@ def test_DOS_2D_nnn():
     params = [4, 0.192, 0.126, 0.555, 750, 0.03, "lorentzian"] #2D nnn case with lorentzian approximation
     kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
     ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(params, kx_start, ky_start, (4*np.pi)/params[3])
+    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
     kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
 
     energy_band = calc.TB_2D(params, kx, ky)
@@ -510,7 +514,7 @@ def test_DOS_2D_zero_tnn():
     params = [3, 0.0, 0.1, 5.0, 100, 0.01, "lorentzian"]
     kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
     ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(params, kx_start, ky_start, (4*np.pi)/params[3])
+    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
     kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
 
     energy_band = calc.TB_2D(params, kx, ky)
@@ -533,7 +537,7 @@ def test_DOS_2D_zero_tnnn():
     params_nnn = [4, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NNN case
     kx_start = np.linspace(-(4*np.pi)/params_nn[3], (4*np.pi)/params_nn[3], params_nn[4])
     ky_start = np.linspace(-(4*np.pi)/params_nn[3], (4*np.pi)/params_nn[3], params_nn[4])
-    hexagon = calc.hexagonal_contour(params_nn, kx_start, ky_start, (4*np.pi)/params_nn[3])
+    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params_nn[3])
     kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
 
     energy_band_nn = calc.TB_2D(params_nn, kx, ky)

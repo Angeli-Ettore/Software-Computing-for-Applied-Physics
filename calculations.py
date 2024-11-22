@@ -138,7 +138,7 @@ def TB_1D(params, k):
     if params[0]==1:
         energy_values = -2 * params[1] * np.cos(k * params[3])
     elif params[0]==2:
-        energy_values = -2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(k * params[3])
+        energy_values = - 2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(2 * k * params[3])
     else:
         raise ValueError("Error: when calling TB_1D(), the case value is invalid.")
     return energy_values

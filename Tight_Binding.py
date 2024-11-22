@@ -7,7 +7,7 @@ from time import time
 
 ''' --------definition of working parameters-------- '''
 t_nn = 1.0 # nearest neighbor hopping parameter
-t_nnn = 0.4 * t_nn # next-nearest neighbor hopping parameter
+t_nnn = 0.2 * t_nn # next-nearest neighbor hopping parameter
 a = 1.0 #lattice constant
 N = 1000 #number of lattice sites
 width = 0.01 # parameter of the gaussian\lorentzian that approximate delta function in DOS calculation
