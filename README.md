@@ -33,3 +33,12 @@ Thanks to the normalization condition on the atomic states, one can express furt
 \epsilon_{\vec{k}} = -t_{nn} \sum_{\vec{r}_{nn}} e^{i \vec{k}\vec{r}_{nn}} - t_{nnn} \sum_{\vec{r}_{nnn}} e^{i \vec{k}\vec{r}_{nnn}}
 ```
 
+From here, in order to express further the energy band, one needs to lose in generality. It is in fact needed to define the coordinates of the nearest and next nearest neighbors! 
+In the **1D** case, the 2 nearest neighbors are obviously at distance $\pm a$, while the 2 next nearest neighbors at distance $\pm 2a$. This will lead to the following energy band:
+
+```math
+\epsilon_k = -2t_{nn}cos(ka) - 2t_{nnn}cos(2ka)
+```
+
+The **2D** case, in particular the triangular lattice, has instead neighbors arranged at the vertices of hexagons. To be precise, the 6 nearest neighbors are at a distance $a$ from each atom, while the 6 next nearest neighbors at a distance $\sqrt{3}a$. In the following picture is reported a sketch of a triangular lattice, with highlighted the 6 nn & the 6 nnn.
+
