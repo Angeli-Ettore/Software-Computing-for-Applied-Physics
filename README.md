@@ -42,3 +42,4 @@ In the **1D** case, the 2 nearest neighbors are obviously at distance $\pm a$, w
 
 The **2D** case, in particular the triangular lattice, has instead neighbors arranged at the vertices of hexagons. To be precise, the 6 nearest neighbors are at a distance $a$ from each atom, while the 6 next nearest neighbors at a distance $\sqrt{3}a$. In the following picture is reported a sketch of a triangular lattice, with highlighted the 6 nn & the 6 nnn.
 
+![alt text](https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics/blob/main/triangular_lattice.png)
