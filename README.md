@@ -57,3 +57,19 @@ In the **1D** case, if $4t_{nnn}<t_{nn}$ the absolute maxima appear at $k=\pm \p
 If instead  $4t_{nnn}<t_{nn}$, the energy maxima appear when $cos(ka)=-t_{nn}/(4t_{nnn})$.
 
 Similarly, in the **2D** case, if $8t_{nnn}<t_{nn}$ the absolute maxima appear at the $K$ point, while if $8t_{nnn}>t_{nn}$ they appear at the $M$ point.
+
+In order to have a better understanding of the studied systems, I chose to calculate the Density of States in each one of these cases (1D & 2D, nn & nnn). Starting from the formal definition of Density of States:
+
+```math
+g(\epsilon) = \sum_{\vec{k}} \delta(\epsilon - \epsilon_{\vec{k}})
+```
+
+in my code I chose to approximate the Dirac's delta with two options: a lorentzian and a gaussian. The two forms of the approximated Density of States are the following:
+
+```math
+g(\epsilon)_{lorentzian} = \sum_{\vec{k}} \frac{w}{\pi[(\epsilon - \epsilon_{\vec{k}})^2+w^2]}
+```
+
+```math
+g(\epsilon)_{gaussian} = \sum_{\vec{k}} \frac{1}{w\sqrt{2\pi}} e^{\frac{(\epsilon - \epsilon_{\vec{k}})^2}{2w^2}}
+```
