@@ -40,6 +40,8 @@ In the **1D** case, the 2 nearest neighbors are obviously at distance $\pm a$, w
 \epsilon_k = -2t_{nn}cos(ka) - 2t_{nnn}cos(2ka)
 ```
 
-The **2D** case, in particular the triangular lattice, has instead neighbors arranged at the vertices of hexagons. To be precise, the 6 nearest neighbors are at a distance $a$ from each atom, while the 6 next nearest neighbors at a distance $\sqrt{3}a$. In the following picture is reported a sketch of a triangular lattice, with highlighted the 6 nn & the 6 nnn.
+The **2D** case, in particular the triangular lattice, has instead neighbors arranged at the vertices of hexagons. To be precise, the 6 nearest neighbors are at a distance $a$ from each atom, while the 6 next nearest neighbors at a distance $\sqrt{3}a$. In the following picture is reported a sketch of a triangular lattice, with highlighted the 6 nn (purple) & the 6 nnn (green).
 
 ![alt text](https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics/blob/main/triangular_lattice.png)
+
+Due to the symmetry of these neighbors, inserting the positions of these neighbors
