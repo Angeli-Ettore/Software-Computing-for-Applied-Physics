@@ -40,8 +40,8 @@ def params_check(params):
     if not isinstance(params[4], int): # check if 'N' is an integer
         raise ValueError("Number of lattice points is invalid. Please insert a positive integer value.")
 
-    if params[4] <= 99: # check if 'N' is positive and greater than 99
-        raise ValueError("Number of lattice points is invalid. Please insert a positive integer higher than 99.")
+    if params[4] <= 99 or params[4] >= 5001: # check if 'N' is positive and between 100 & 5000
+        raise ValueError("Number of lattice points is invalid. Please insert a positive integer higher than 99, but lower than 5001.")
 
     if params[5] >= 1 or params[5] <= 0: # check if the width of the gaussian/lorentzian is valid
         raise ValueError("Width of the Gaussian/Lorentzian is invalid. Please insert a positive value which is less than 1.")

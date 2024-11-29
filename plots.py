@@ -147,7 +147,7 @@ def Energy_and_DOS_2D_plotter(params, kx, ky, energy_values, dos_range, dos_valu
 
 def color_map_plotter(params, kx, ky, energy_values):
     '''
-    plots color map of the energy band in the tight-binding model (2D).
+    plots color map of the energy band in the tight-binding model (2D) with FBZ (white line).
     Input:
         params : list
             - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
