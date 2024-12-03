@@ -2,14 +2,15 @@ import numpy as np
 
 def params_check(params):
     '''
-    check the validity of each inserted paramter.
+    check the validity of each inserted parameter.
     Input:
         params : list
-            - params[1]: hopping parameter for nearest neighbors 'tnn'.
-            - params[2]: hopping parameter for next-nearest neighbors 'tnnn'.
-            - params[3]: lattice constant 'a'.
-            - params[4]: number of points 'N'.
-            - params[5]: width of the function approximating a Dirac's delta 'w'.
+            - params[0]: hopping parameter for nearest neighbors 'tnn'.
+            - params[1]: hopping parameter for next-nearest neighbors 'tnnn'.
+            - params[2]: lattice constant 'a'.
+            - params[3]: number of points 'N'.
+            - params[4]: width of the function approximating a Dirac's delta 'w'.
+            - params[5]: number of unit cells contained in the color map plot 'size'.
             - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.
     Output:
         none
@@ -17,238 +18,277 @@ def params_check(params):
         ValueError
             if params is empty
             if tnn < 0
-            if tnnn < 0 or tnnn > tnn
+            if tnnn < 0
             if a <= 0
-            if N is not an integer or N < 99
+            if N is not an integer, if N < 100 or N > 5000
             if w >= 1 or w <=0
-            if method is not gaussian or lorentzian
+            if size is positive
+            if method is not gaussian or lorentzian.
     Notes:
         prints the list of inserted parameters
     '''
     if not params: # check if the list is empty
         raise ValueError("Parameter list is empty. Please initialize the sequence of paramters.")
     
-    if params[1] < 0: #check if 'tnn' is positive
-        raise ValueError("Nearest neighbor hopping parameter is invalid. Please insert a positive value.")
+    if params[0] < 0: #check if 'tnn' is equal to or greater than 0
+        raise ValueError("Nearest neighbor hopping parameter is invalid. Please insert a non-negative value.")
     
-    if params[2] < 0 or params[2] > params[1]: #check if 'tnnn' is positive and less or equal to tnn
-        raise ValueError("Next-nearest neighbor hopping parameter is invalid. Please insert a positive value, which is less than the nearest neighbor hopping parameter.")
+    if params[1] < 0: #check if 'tnnn' is equal to or greater than 0
+        raise ValueError("Next-nearest neighbor hopping parameter is invalid. Please insert a non-negative value.")
 
-    if params[3] <= 0: # check if 'a' is positive
+    if params[2] <= 0: # check if 'a' is positive
         raise ValueError("Lattice parameter is invalid. Please insert a positive value.")
 
-    if not isinstance(params[4], int): # check if 'N' is an integer
+    if not isinstance(params[3], int): # check if 'N' is an integer
         raise ValueError("Number of lattice points is invalid. Please insert a positive integer value.")
 
-    if params[4] <= 99 or params[4] >= 5001: # check if 'N' is positive and between 100 & 5000
+    if params[3] < 100 or params[3] > 5000: # check if 'N' is positive and between 100 & 5000
         raise ValueError("Number of lattice points is invalid. Please insert a positive integer higher than 99, but lower than 5001.")
 
-    if params[5] >= 1 or params[5] <= 0: # check if the width of the gaussian/lorentzian is valid
-        raise ValueError("Width of the Gaussian/Lorentzian is invalid. Please insert a positive value which is less than 1.")
+    if params[4] >= 1 or params[4] <= 0: # check if the width of the gaussian/lorentzian is valid
+        raise ValueError("Width of the Gaussian/Lorentzian is invalid. Please insert a positive value between 0 and 1.")
 
-    if params[6] != "gaussian" and params[6] != "lorentzian": #check if the method string is valid 
+    if params[5] <= 0: # check if 'size' is positive
+        raise ValueError("Size of the color map is invalid. Please insert a positive value.")
+
+    if params[6] != 'gaussian' and params[6] != 'lorentzian': #check if the method string is valid 
         raise ValueError("Method for DOS calculation is invalid. Please insert either 'gaussian' or 'lorentzian'.")
 
     print("List of inserted parameters is valid:\n"
-        f"tnn = {params[1]}\n"
-        f"tnnn = {params[2]}\n"
-        f"a = {params[3]}\n"
-        f"N = {params[4]}\n"
-        f"width = {params[5]}\n"
+        f"tnn = {params[0]}\n"
+        f"tnnn = {params[1]}\n"
+        f"a = {params[2]}\n"
+        f"N = {params[3]}\n"
+        f"width = {params[4]}\n"
+        f"size = {params[5]}\n"
         f"method = {params[6]}\n"
-        "the calculation will start now..."
-    ) 
+        "the calculation will start now...") 
     return
 
 
-def hexagonal_contour(kx, ky, bound):
+def hexagonal_contour(a, size, kx, ky):
     '''
-    define the boundary lines for the hexagon with required size.
+    define the boundary lines for the hexagon with the required size.
     Input:
-        params : list
-            - bound: positive float which defines the height of the hexagon side.
-        kx: array of the x component of the wave vector (2D)
-        ky: array of the y component of the wave vector (2D)
+        a: lattice constant.
+        size: number of unit cells contained in the hexagonal mask 'hexagon'.
+        kx: array of the x component of the wave vector (2D).
+        ky: array of the y component of the wave vector (2D).
     Output:
-        hexagon: hexagonal contour of kx and ky
+        hexagon: hexagonal contour of kx and ky.
     Raises:
         ValueError
-            if bound < 0
+            if size < 0
     '''
-    if bound >= 0:
-        contour1 = ky <= -np.sqrt(3) * (kx - bound)
-        contour2 = ky >= -np.sqrt(3) * (kx + bound)
-        contour3 = ky >= np.sqrt(3) * (kx - bound)
-        contour4 = ky <= np.sqrt(3) * (kx + bound)
-        contour5 = np.abs(ky) <= bound
-        
-        hexagon = contour1 & contour2 & contour3 & contour4 & contour5 # Define the hexagon
-    else:
+    if size < 0:
         raise ValueError("Error when calling function hexagonal_contour(). Please insert a positive value for the bound.")
+
+    contour1 = ky <= -np.sqrt(3) * (kx - size*(4 * np.pi)/a)
+    contour2 = ky >= -np.sqrt(3) * (kx + size*(4 * np.pi)/a)
+    contour3 = ky >= np.sqrt(3) * (kx - size*(4 * np.pi)/a)
+    contour4 = ky <= np.sqrt(3) * (kx + size*(4 * np.pi)/a)
+    contour5 = np.abs(ky) <= size*(4 * np.pi)/a
+        
+    hexagon = contour1 & contour2 & contour3 & contour4 & contour5 # Define the hexagon
     return hexagon
 
+def wave_vectors_builder(a, N, size):
+    '''
+    define the 1D wave vector 'k' and the two components of the 2D wave vector, 'kx' and 'ky'.
+    The 2D wave vector is shaped as an hexagon that contains as many unit cells as the input parameter 'size'.
+    Input:
+        a: lattice constant.
+        N: number of points.
+        size: number of unit cells contained in the grid generated by 'kx' and 'ky'.
+    Output:
+        k: array of the wave vector (1D).
+        kx: array of the x component of the wave vector (2D).
+        ky: array of the y component of the wave vector (2D).
+    '''
+    k = np.linspace(-np.pi/a, np.pi/a, N) # 1D wave vector
+    kx = np.linspace(-size*(4*np.pi)/a, size*(4*np.pi)/a, N) # 2D wave vector (x component)
+    ky = np.linspace(-size*(8*np.pi)/(a*np.sqrt(3)), size*(8*np.pi)/(a*np.sqrt(3)), N) # 2D wave vector (y component)
 
-def high_symmetry_path(params):
+    hexagon = hexagonal_contour(a, size, kx, ky)
+    kx_grid, ky_grid = np.meshgrid(kx[hexagon], ky[hexagon]) # mesh grid of the 2D wave vector
+    return k, kx_grid, ky_grid
+
+def high_symmetry_path(a, N):
     '''
     generates the high-symmetry path Γ -> K -> M -> Γ in the First Brillouin Zone.
     Input:
-        params : list
-            - params[3]: lattice constant 'a'.
-            - params[4]: number of points 'N'.
+        a: lattice constant.
+        N: number of points.
     Output:
         kx_path : array of the x-components of the wave vector along the high-symmetry path.
         ky_path : array of the y-components of the wave vector along the high-symmetry path.
     '''
     G = [0, 0]
-    M = [np.pi / params[3], np.pi / (np.sqrt(3) * params[3])]
-    K = [4 * np.pi / (3 * params[3]), 0]
+    M = [np.pi / a, np.pi / (np.sqrt(3) * a)]
+    K = [4 * np.pi / (3 * a), 0]
 
     # Γ -> K
-    kx_segment1 = np.linspace(G[0], K[0], params[4])
-    ky_segment1 = np.linspace(G[1], K[1], params[4])
+    kx_segment1 = np.linspace(G[0], K[0], N)
+    ky_segment1 = np.linspace(G[1], K[1], N)
     # K -> M
-    kx_segment2 = np.linspace(K[0], M[0], params[4])
-    ky_segment2 = np.linspace(K[1], M[1], params[4])
+    kx_segment2 = np.linspace(K[0], M[0], N)
+    ky_segment2 = np.linspace(K[1], M[1], N)
     # M -> Γ
-    kx_segment3 = np.linspace(M[0], G[0], params[4])
-    ky_segment3 = np.linspace(M[1], G[1], params[4])
+    kx_segment3 = np.linspace(M[0], G[0], N)
+    ky_segment3 = np.linspace(M[1], G[1], N)
     
     kx_path = np.concatenate([kx_segment1, kx_segment2, kx_segment3])
     ky_path = np.concatenate([ky_segment1, ky_segment2, ky_segment3])
     return kx_path, ky_path
 
 
-def TB_1D(params, k):
+def TB_1D_nn(tnn, a, k):
     '''
-    calculates the energy band in the tight-binding model (1D).
+    calculates the energy band in the 1D tight-binding model, accounting for nearest neighbors interaction.
     Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
-            - params[1]: hopping parameter for nearest neighbors 'tnn'.
-            - params[2]: hopping parameter for next-nearest neighbors 'tnnn'.
-            - params[3]: lattice constant 'a'.
-        k : array of the wave vector (1D)
+        tnn: hopping parameter for nearest neighbors.
+        a: lattice constant.
+        k : array of the wave vector (1D).
     Output:
-        energy_values : array of the energy band 
-    Raises:
-        ValueError
-            if params[0] is not 1 or 2.
+        array of the resulting energy band.
     '''
-    energy_values = np.zeros_like(k)
-    if params[0]==1:
-        energy_values = -2 * params[1] * np.cos(k * params[3])
-    elif params[0]==2:
-        energy_values = - 2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(2 * k * params[3])
-    else:
-        raise ValueError("Error: when calling TB_1D(), the case value is invalid.")
-    return energy_values
+    return -2 * tnn * np.cos(k * a)
 
-
-def TB_2D(params, kx, ky):
+def TB_1D_nnn(tnn, tnnn, a, k):
     '''
-    calculates the energy band in the tight-binding model (2D).
+    calculates the energy band in the 1D tight-binding model, accounting also for next-nearest neighbors interaction.
     Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (3=nn, 4=nnn).
-            - params[1]: hopping parameter for nearest neighbors 'tnn'.
-            - params[2]: hopping parameter for next-nearest neighbors 'tnnn'.
-            - params[3]: lattice constant 'a'.
-        kx: array of the x component of the wave vector (2D)
-        ky: array of the y component of the wave vector (2D)
+        tnn: hopping parameter for nearest neighbors.
+        tnnn: hopping parameter for next-nearest neighbors.
+        a: lattice constant.
+        k : array of the wave vector (1D).
     Output:
-        energy_values : array of the energy band 
-    Raises:
-        ValueError
-            if params[0] is not 3 or 4.
+        array of the resulting energy band.
     '''
-    energy_values = np.zeros_like(kx)
-    if params[0]==3:
-        energy_values = -2 * params[1] * (np.cos(kx * params[3]) + 2 * np.cos(kx * params[3] / 2) * np.cos(ky * params[3] * np.sqrt(3) / 2))
-    elif params[0]==4:
-        energy_values = -2 * params[1] * (np.cos(kx * params[3]) + 2 * np.cos(kx * params[3] / 2) * np.cos(ky * params[3] * np.sqrt(3) / 2)) - 2 * params[2] * (np.cos(ky * params[3] * np.sqrt(3)) + 2 * np.cos(ky * params[3] * np.sqrt(3) / 2) * np.cos(kx * params[3] * 3 / 2))
-    else:
-        raise ValueError("Error: when calling TB_2D(), the case value is invalid.")
-    return energy_values
-    
+    return TB_1D_nn(tnn, a, k) - 2 * tnnn * np.cos(2 * k * a)
 
 
-def DOS_1D(params, energy_values):
+def TB_2D_nn(tnn, a, kx, ky):
     '''
-    calculates the density of states in the tight-binding model (1D).
+    calculates the energy band in the 2D tight-binding model, accounting for nearest neighbors interaction.
     Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
-            - params[4]: number of points 'N'.
-            - params[5]: width of the function approximating a Dirac's delta 'w'.
-            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.
-        energies : array of the energy band 
+        tnn: hopping parameter for nearest neighbors.
+        a: lattice constant.
+        kx: array of the x component of the wave vector (2D).
+        ky: array of the y component of the wave vector (2D).
+    Output:
+        array of the resulting energy band.
+    '''
+    return -2 * tnn * (np.cos(kx * a) + 2 * np.cos(kx * a / 2) * np.cos(ky * a * np.sqrt(3) / 2))
+
+def TB_2D_nnn(tnn, tnnn, a, kx, ky):
+    '''
+    calculates the energy band in the 2D tight-binding model, accounting also for next-nearest neighbors interaction.
+    Input:
+        tnn: hopping parameter for nearest neighbors.
+        tnnn: hopping parameter for next-nearest neighbors.
+        a: lattice constant.
+        kx: array of the x component of the wave vector (2D).
+        ky: array of the y component of the wave vector (2D).
+    Output:
+        array of the resulting energy band.
+    '''
+    return TB_2D_nn(tnn, a, kx, ky) - 2 * tnnn * (np.cos(ky * a * np.sqrt(3)) + 2 * np.cos(ky * a * np.sqrt(3) / 2) * np.cos(kx * a * 3 / 2))
+
+
+def gaussian_weights(w, E, E_k):
+    '''
+    approximation of a Dirac's delta with a gaussian function.
+    Input:
+        w: width of the gaussian function approximating the Dirac's delta.
+        E: energy value at which the gaussian is calculated.
+        E_k: array of the energy band.
+    Output:
+        gaussian weight for the DOS calculation at energy value E.
+    '''
+    return np.exp(-((E - E_k) ** 2) / (w ** 2))
+
+def lorentzian_weights(w, E, E_k):
+    '''
+    approximation of a Dirac's delta with a lorentzian function.
+    Input:
+        w: width of the lorentzian function approximating the Dirac's delta.
+        E: energy value at which the gaussian is calculated.
+        E_k: array of the energy band.
+    Output:
+        lorentzian weight for the DOS calculation at energy value E.
+    '''
+    return 1 / ((E - E_k) ** 2 + w ** 2)
+
+
+def DOS_1D(tnn, N, w, method, energy_values):
+    '''
+    calculates the normalized density of states in the 1D tight-binding model.
+    Input:
+        tnn: hopping parameter for nearest neighbors.
+        N: number of points.
+        w: width of the function approximating a Dirac's delta.
+        method: string specifying the approximation method 'gaussian' or 'lorentzian'.
+        energy_values : array of the energy band .
     Output:
         dos_range : array of the energy range for which the DOS is calculated.
-        dos_values : array of the normalized DOS values for the corresponding energy range
-    Raises:
-        ValueError
-            If params[6] is not "gaussian" or "lorentzian".
+        dos_values : array of the normalized DOS values for the corresponding energy range.
     Notes:
         if the energy band is zero everywhere, the DOS is manually set to zero without normalization.
     '''
-    dos_range = np.linspace(min(energy_values)*1.1, max(energy_values)*1.1, params[4])  # Energy values for which the DOS is calculated
-    dos_values = np.zeros(params[4])
+    dos_range = np.linspace(min(energy_values)*1.1, max(energy_values)*1.1, N)  # Energy values for which the DOS is calculated
+    dos_values = np.zeros(N)
+
+    if tnn == 0:
+        print("0 nearest neighbor hopping parameter defines 0 Density of States.")     
+        return dos_range, dos_values
     
-    if params[1] != 0:
-        for i, E in enumerate(dos_range):
-            if params[6] == "gaussian":  # Gaussian approximation
-                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2))
-            elif params[6] == "lorentzian":  # Lorentzian approximation
-                weights = 1 / ((E - energy_values) ** 2 + params[5] ** 2)
-            else:
-                raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
-            dos_values[i] = np.sum(weights)
-    
-        # Normalization of DOS using trapezoidal integration
-        total_area = np.trapz(dos_values, dos_range)
-        dos_values /= total_area
-    else:
-       print("0 nearest neighbor hopping parameter define 0 Density of States.")     
+    if method == 'gaussian':  # Gaussian approximation
+        weight_function = gaussian_weights
+    elif method == 'lorentzian':  # Lorentzian approximation
+        weight_function = lorentzian_weights
+
+    for i, E in enumerate(dos_range):
+        dos_values[i] = np.sum(weight_function(w, E, energy_values))
+
+    # Normalization of DOS using trapezoidal integration
+    total_area = np.trapz(dos_values, dos_range)
+    dos_values /= total_area
     return dos_range, dos_values
 
 
-def DOS_2D(params, energy_mesh):
+def DOS_2D(tnn, N, w, method, energy_mesh):
     '''
-    calculates the density of states in the tight-binding model (2D).
+    calculates the normalized density of states in the 2D tight-binding model.
     Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
-            - params[4]: number of points 'N'.
-            - params[5]: width of the function approximating a Dirac's delta 'w'.
-            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.
-        energies_mesh : 2D array of the energy band across the (kx,ky) grid 
+        tnn: hopping parameter for nearest neighbors.
+        N: number of points 'N'.
+        w: width of the function approximating a Dirac's delta 'w'.
+        method: string specifying the approximation method 'gaussian' or 'lorentzian'.
+        energies_mesh : 2D array of the energy band across the (kx,ky) grid.
     Output:
         dos_range : array of the energy range for which the DOS is calculated.
-        dos_values : array of the normalized DOS values for the corresponding energy range
-    Raises:
-        ValueError
-            If params[6] is not "gaussian" or "lorentzian".
+        dos_values : array of the normalized DOS values for the corresponding energy range.
     Notes:
         if the energy band is zero everywhere, the DOS is manually set to zero without normalization.
     '''
     energy_values = energy_mesh.flatten()
-    dos_range = np.linspace(min(energy_values)*1.1,max(energy_values)*1.1, params[4])  # Energy values for which the DOS is calculated
-    dos_values = np.zeros(params[4])
-    
-    if params[1] != 0:
-        for i, E in enumerate(dos_range):
-            if params[6] == "gaussian":  # Gaussian case
-                weights = np.exp(-((E - energy_values) ** 2) / (params[5] ** 2))
-            elif params[6] == "lorentzian":  # Lorentzian case
-                weights = 1 / ((E - energy_values) ** 2 + params[5] ** 2)        
-            else:
-                raise ValueError("Error: Invalid approximation method specified. Choose either gaussian or lorentzian.")
-            dos_values[i] = np.sum(weights)
-    
-        # Normalization of DOS using trapezoidal integration
-        total_area = np.trapz(dos_values, dos_range)
-        dos_values /= total_area
-    else:
-       print("0 nearest neighbor hopping parameter define 0 Density of States.")     
+    dos_range = np.linspace(min(energy_values)*1.1,max(energy_values)*1.1, N)  # Energy values for which the DOS is calculated
+    dos_values = np.zeros(N)
 
+    if tnn == 0:
+        print("0 nearest neighbor hopping parameter defines 0 Density of States.")     
+        return dos_range, dos_values
+    
+    if method == 'gaussian':  # Gaussian approximation
+        weight_function = gaussian_weights
+    elif method == 'lorentzian':  # Lorentzian approximation
+        weight_function = lorentzian_weights
+
+    for i, E in enumerate(dos_range):
+        dos_values[i] = np.sum(weight_function(w, E, energy_values))
+    
+    # Normalization of DOS using trapezoidal integration
+    total_area = np.trapz(dos_values, dos_range)
+    dos_values /= total_area
     return dos_range, dos_values
