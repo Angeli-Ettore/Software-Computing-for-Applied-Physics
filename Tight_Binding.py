@@ -1,70 +1,65 @@
-# Band structure and Density Of States calculation for a triangular lattice in different cases of dimensionality and neighbor interaction
-
-import numpy as np
 import plots as plot
 import calculations as calc
+import configparser
 from time import time
 
 ''' --------definition of working parameters-------- '''
-t_nn = 1.0 # nearest neighbor hopping parameter
-t_nnn = 0.5 * t_nn # next-nearest neighbor hopping parameter
-a = 1.0 #lattice constant
-N = 1000 #number of lattice sites
-width = 0.01 # parameter of the gaussian\lorentzian that approximate delta function in DOS calculation
-method = "lorentzian" # method for approximating Dirac's delta in DOS calculation (use only gaussian or lorentzian)
-tempo = time() # used time for the entire code
+config = configparser.ConfigParser()
+config.read('parameters.ini') # load data from the configuration file 'parameters.ini'
+
+tnn_p = float(config['parameters']['tnn']) # nearest neighbor hopping parameter
+ratio_p = float(config['parameters']['ratio']) # ratio between next-nearest neighbor and nearest neighbor hopping parameters
+tnnn_p = tnn_p * ratio_p # next-nearest neighbor hopping parameter
+a_p = float(config['parameters']['a']) # lattice constant
+N_p = int(config['parameters']['N']) # number of lattice sites
+w_p = float(config['parameters']['w']) # parameter of the gaussian\lorentzian that approximate delta function in DOS calculation
+size_p = int(config['parameters']['size'])# number of plotted hexagonal unit cells
+method_p = config['parameters']['method'] # method for approximating Dirac's delta in DOS calculation (use only gaussian or lorentzian)
+tempo = time() # time at which the calculation starts
 ''' ------------------------------------------------ '''
 
 
+
 ''' --------crafting and checking of params-------- '''
-params = [0, t_nn, t_nnn, a, N, width, method] 
+params = [tnn_p, tnnn_p, a_p, N_p, w_p, size_p, method_p] 
 calc.params_check(params)
 ''' ----------------------------------------------- '''
 
 
+
 ''' --------definition of wave vectors (1D & 2D)-------- '''
-bound_1D =  np.pi / params[3] #dimension of the 1D bound (linear case)
-bound_2D = (4 * np.pi) / params[3] #dimension of the 2D bound (hexagonal case)
-tr_to_sq_factor = 2/np.sqrt(3) #normalization factor needed for triangular FBZ for plotting
-
-k_vec = np.linspace(-bound_1D, bound_1D , params[4]) # wave vector (1D case)
-
-kx_vec = np.linspace(-bound_2D, bound_2D, params[4]) # wave vector x component (2D case)
-ky_vec = np.linspace(-bound_2D * tr_to_sq_factor, bound_2D * tr_to_sq_factor, params[4]) # wave vector y component (2D case)
-
-hexagon = calc.hexagonal_contour(kx_vec, ky_vec, bound_2D)
-kx_grid, ky_grid = np.meshgrid(kx_vec[hexagon], ky_vec[hexagon]) # mesh grid of the wave vector (2D case)
+k, kx_grid, ky_grid = calc.wave_vectors_builder(a_p, N_p, size_p)
 ''' ---------------------------------------------------- '''
 
+
+
 ''' --------calculation and plotting of energy bands and DOS-------- '''
-params[0] = 1 #1D NN case
-energy_values = calc.TB_1D(params, k_vec)
-dos_range, dos_values = calc.DOS_1D(params, energy_values)
-
-plot.Energy_and_DOS_1D_plotter(params, k_vec, energy_values, dos_range, dos_values)
-
-
-params[0] = 2 #1D NNN case
-energy_values = calc.TB_1D(params, k_vec)
-dos_range, dos_values = calc.DOS_1D(params, energy_values)
-
-plot.Energy_and_DOS_1D_plotter(params, k_vec, energy_values, dos_range, dos_values)
+filename_1D_nn = "Energy Band and Density of States (1D nn)"
+energy_values = calc.TB_1D_nn(tnn_p, a_p, k)
+dos_range, dos_values = calc.DOS_1D(tnn_p, N_p, w_p, method_p, energy_values)
+plot.Energy_and_DOS_1D_plotter(filename_1D_nn, a_p, k, energy_values, dos_range, dos_values)
 
 
-params[0] = 3 #2D NN case
-energy_values = calc.TB_2D(params, kx_grid, ky_grid)
-dos_range, dos_values = calc.DOS_2D(params, energy_values)
-
-plot.Energy_and_DOS_2D_plotter(params, kx_grid, ky_grid, energy_values, dos_range, dos_values)
-plot.color_map_plotter(params, kx_grid, ky_grid, energy_values)
+filename_1D_nnn = "Energy Band and Density of States (1D nnn)"
+energy_values = calc.TB_1D_nnn(tnn_p, tnnn_p, a_p, k)
+dos_range, dos_values = calc.DOS_1D(tnn_p, N_p, w_p, method_p, energy_values)
+plot.Energy_and_DOS_1D_plotter(filename_1D_nnn, a_p, k, energy_values, dos_range, dos_values)
 
 
-params[0] = 4 #2D NNN case
-energy_values = calc.TB_2D(params, kx_grid, ky_grid)
-dos_range, dos_values = calc.DOS_2D(params, energy_values)
+filename_2D_nn = "Energy Band and Density of States (2D nn)"
+energy_mesh = calc.TB_2D_nn(tnn_p, a_p, kx_grid, ky_grid)
+dos_range, dos_values = calc.DOS_2D(tnn_p, N_p, w_p, method_p, energy_mesh)
+plot.Energy_and_DOS_2D_plotter(filename_2D_nn, tnn_p, tnnn_p, a_p, kx_grid, ky_grid, energy_mesh, dos_range, dos_values)
+plot.color_map_plotter("Color Map of the Energy Band (2D nn)", a_p, kx_grid, ky_grid, energy_mesh)
 
-plot.Energy_and_DOS_2D_plotter(params, kx_grid, ky_grid, energy_values, dos_range, dos_values)
-plot.color_map_plotter(params, kx_grid, ky_grid, energy_values)
+
+filename_2D_nnn = "Energy Band and Density of States (2D nnn)"
+energy_mesh = calc.TB_2D_nnn(tnn_p, tnnn_p, a_p, kx_grid, ky_grid)
+dos_range, dos_values = calc.DOS_2D(tnn_p, N_p, w_p, method_p, energy_mesh)
+plot.Energy_and_DOS_2D_plotter(filename_2D_nnn, tnn_p, tnnn_p, a_p, kx_grid, ky_grid, energy_mesh, dos_range, dos_values)
+plot.color_map_plotter("Color Map of the Energy Band (2D nnn)", a_p, kx_grid, ky_grid, energy_mesh)
 ''' ---------------------------------------------------------------- '''
+
+
 
 print(f"Code executed successfully in {time() - tempo:.2f} seconds!")

@@ -150,7 +150,7 @@ def color_map_plotter(filename, a, kx, ky, energy_values):
     plt.ylabel("Wave Vector $k_y$")
     
     #plotting the FBZ as a white line    
-    fbz = calc.hexagonal_contour(a, 1, kx, ky)
+    fbz = calc.hexagonal_contour(a, 0.33333, kx, ky)
     plt.contour(kx, ky, fbz, colors='white')
 
     plt.title(filename)

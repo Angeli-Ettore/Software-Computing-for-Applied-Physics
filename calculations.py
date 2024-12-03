@@ -83,12 +83,12 @@ def hexagonal_contour(a, size, kx, ky):
     if size < 0:
         raise ValueError("Error when calling function hexagonal_contour(). Please insert a positive value for the bound.")
 
-    contour1 = ky <= -np.sqrt(3) * (kx - size*(4 * np.pi)/a)
-    contour2 = ky >= -np.sqrt(3) * (kx + size*(4 * np.pi)/a)
-    contour3 = ky >= np.sqrt(3) * (kx - size*(4 * np.pi)/a)
-    contour4 = ky <= np.sqrt(3) * (kx + size*(4 * np.pi)/a)
+    contour1 = ky <= -np.sqrt(3) * (kx - size*(4*np.pi)/a)
+    contour2 = ky >= -np.sqrt(3) * (kx + size*(4*np.pi)/a)
+    contour3 = ky >= np.sqrt(3) * (kx - size*(4*np.pi)/a)
+    contour4 = ky <= np.sqrt(3) * (kx + size*(4*np.pi)/a)
     contour5 = np.abs(ky) <= size*(4 * np.pi)/a
-        
+    
     hexagon = contour1 & contour2 & contour3 & contour4 & contour5 # Define the hexagon
     return hexagon
 
