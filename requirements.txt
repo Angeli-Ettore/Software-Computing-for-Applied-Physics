@@ -1,5 +1,4 @@
 numpy
 time
 matplotlib
-hypothesis
 pytest

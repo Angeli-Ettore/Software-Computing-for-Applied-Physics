@@ -1,17 +1,11 @@
 import calculations as calc
 import numpy as np
-from hypothesis import strategies as st
-from hypothesis import given
 import pytest
 
 ''' --------testing check_params-------- '''
 def test_params_check_empty():
     '''
     test that params_check() raises a ValueError if the parameter list is empty.
-    Input:
-        none
-    Output:
-        none
     '''
     with pytest.raises(ValueError, match="Parameter list is empty."):
         calc.params_check([])
@@ -19,194 +13,180 @@ def test_params_check_empty():
 def test_params_check_negative_tnn(): 
     '''
     test that params_check() raises a ValueError if nearest neighbor hopping 'tnn' is not positive.
-    Input:
-        none
-    Output:
-        none
     '''
-    params = [1, -1, 0.5, 1.0, 100, 0.1, "gaussian"]
+    params = [-1, 0.5, 1.0, 100, 0.1, 1, 'gaussian']
     with pytest.raises(ValueError, match="Nearest neighbor hopping parameter is invalid."):
         calc.params_check(params)
 
-def test_params_check_invalid_tnnn(): # test that params_check() raises a ValueError if next-nearest neighbor hopping (params[2]) is not positive or exceeds nearest neighbor hopping.
+def test_params_check_negative_tnnn():
     '''
-    test that params_check() raises a ValueError if next-nearest neighbor hopping 'tnnn' is not positive or higher than nearest neighbor hopping'tnn'.
-    Input:
-        none
-    Output:
-        none
+    test that params_check() raises a ValueError if next-nearest neighbor hopping 'tnnn' is not positive.
     '''
-    params_tnnn_negative = [1, 1.0, -0.5, 1.0, 100, 0.1, "gaussian"]
-    params_tnnn_exceeds_tnn = [1, 1.0, 2.0, 1.0, 100, 0.1, "gaussian"]
+    params = [1.0, -0.5, 1.0, 100, 0.1, 1, 'gaussian']
     with pytest.raises(ValueError, match="Next-nearest neighbor hopping parameter is invalid."):
-        calc.params_check(params_tnnn_negative)
-    with pytest.raises(ValueError, match="Next-nearest neighbor hopping parameter is invalid."):
-        calc.params_check(params_tnnn_exceeds_tnn)
+        calc.params_check(params)
 
-def test_params_check_invalid_lattice_constant():
+def test_params_check_negative_lattice_constant():
     '''
     test that params_check() raises a ValueError if lattice constant 'a' is not positive.
-    Input:
-        none
-    Output:
-        none
     '''
-    params = [1, 1.0, 0.5, -1.0, 100, 0.1, "gaussian"]
+    params = [1.0, 0.5, -1.0, 100, 0.1, 1, 'gaussian']
     with pytest.raises(ValueError, match="Lattice parameter is invalid."):
         calc.params_check(params)
 
 def test_params_check_non_integer_lattice_points():
     '''
     test that params_check() raises a ValueError if number of lattice points 'N' is not an integer.
-    Input:
-        none
-    Output:
-        none
     '''
-    params = [1, 1.0, 0.5, 1.0, 100.5, 0.1, "gaussian"]
+    params = [1.0, 0.5, 1.0, 100.5, 0.1, 1, 'gaussian']
     with pytest.raises(ValueError, match="Number of lattice points is invalid."):
         calc.params_check(params)
 
-def test_params_check_negative_lattice_points():
+def test_params_check_invalid_lattice_points():
     '''
-    test that params_check() raises a ValueError if the number of lattice points 'N' is not positive.
-    Input:
-        none
-    Output:
-        none
+    test that params_check() raises a ValueError if the number of lattice points 'N' is below 100 or above 5000.
     '''
-    params = [1, 1.0, 0.5, 1.0, -10, 0.1, "gaussian"]
+    params_low_N = [1.0, 0.5, 1.0, 99, 0.1, 1, 'gaussian']
+    params_high_N = [1.0, 0.5, 1.0, 5001, 0.1, 1, 'gaussian']
     with pytest.raises(ValueError, match="Number of lattice points is invalid."):
-        calc.params_check(params)
-
-def test_params_check_low_lattice_points():
-    '''
-    test that params_check() raises a ValueError if the number of lattice points 'N' is smaller than 100.
-    Input:
-        none
-    Output:
-        none
-    '''
-    params = [1, 1.0, 0.5, 1.0, 99, 0.1, "gaussian"]
+        calc.params_check(params_low_N)
     with pytest.raises(ValueError, match="Number of lattice points is invalid."):
-        calc.params_check(params)
+        calc.params_check(params_high_N)
 
 def test_params_check_invalid_width():
     '''
-    test that params_check() raises a ValueError if the width parameter 'w' is not in the (0, 1) range.
-    Input:
-        none
-    Output:
-        none
+    test that params_check() raises a ValueError if the width parameter 'w' is negative or higher than 1.
     '''
-    params_width_high = [1, 1.0, 0.5, 1.0, 100, 1.1, "gaussian"]
-    params_width_negative = [1, 1.0, 0.5, 1.0, 100, -0.1, "gaussian"]
+    params_width_high = [1.0, 0.5, 1.0, 100, 1.1, 1, 'gaussian']
+    params_width_negative = [1.0, 0.5, 1.0, 100, -0.1, 1, 'gaussian']
     with pytest.raises(ValueError, match="Width of the Gaussian/Lorentzian is invalid."):
         calc.params_check(params_width_high)
     with pytest.raises(ValueError, match="Width of the Gaussian/Lorentzian is invalid."):
         calc.params_check(params_width_negative)
 
+def test_params_check_negative_size():
+    '''
+    test that params_check() raises a ValueError if the parameter 'size' is negative.
+    '''
+    params = [1.0, 0.5, 1.0, 100, 0.1, -1, 'gaussian']
+    with pytest.raises(ValueError, match="Size of the color map is invalid."):
+        calc.params_check(params)
+
 def test_params_check_invalid_method():
     '''
     test that params_check() raises a ValueError if the method for DOS calculation is not 'gaussian' or 'lorentzian'.  
-    Input:
-        none
-    Output:
-        none
     '''
-    params = [1, 1.0, 0.5, 1.0, 100, 0.1, "invalid_method"]
+    params = [1.0, 0.5, 1.0, 100, 0.1, 1, 'invalid method']
     with pytest.raises(ValueError, match="Method for DOS calculation is invalid."):
         calc.params_check(params)
 
 def test_params_check_valid_params():
     '''
     test that params_check() does not raise an error for valid parameters
-    Input:
-        none
-    Output:
-        none
     '''
-    params = [1, 1.0, 0.5, 1.0, 100, 0.1, "gaussian"]
-    # No exception should be raised for valid parameters
+    params = [1.0, 0.5, 1.0, 100, 0.1, 1, 'gaussian'] # No exception should be raised for valid parameters
     calc.params_check(params)
 ''' ------------------------------------ '''
 
 
 
 ''' --------testing TD_1D-------- '''
-@given(params=st.tuples(
-            st.integers(min_value=1, max_value=2),                    # case (1 or 2)
-            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 4)),  # tnn with 4 decimal places
-            st.floats(min_value=0, max_value=1).map(lambda x: round(x, 4)),     # tnnn/tnn (can be 0) with 4 decimal places
-            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 3)),  # a with 3 decimal places
-            st.integers(min_value=100, max_value=800),               # N
-            st.floats(min_value=0.001, max_value=0.999).map(lambda x: round(x, 3)), # width with 3 decimal places
-            st.sampled_from(["gaussian", "lorentzian"])))             # method
-def test_TB_1D(params):
+def test_TB_1D_nn_symmetry():
     '''
-    test that, after a randomic generation of legal parameters, TD_1D() defines a good energy band.
-    tesing the shape, finiteness, expected values, symmetry and higher and lower limits.
-    Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
-            - params[1]: hopping parameter for nearest neighbors 'tnn'.
-            - params[2]: hopping parameter for next-nearest neighbors 'tnnn'.
-            - params[3]: lattice constant 'a'.
-            - params[4]: number of points 'N'.
-            - params[5]: width of the function approximating a Dirac's delta 'w'.
-            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.
-    Output:
-        none
+    test that TB_1D_nn() defines a symmetric energy band by comparing it to the one generated with -k.
     '''
-    k = np.linspace(-np.pi/params[3], np.pi/params[3] , params[4])
-    params = list(params)  # convert tuple to list to allow modification
-    tnnn = params[2] * params[1] # tnnn goes now from 0 to tnn
-    params[2]=tnnn
-    result = calc.TB_1D(params, k)
+    tnn = 1.0
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    band_nn = calc.TB_1D_nn(tnn, a, k)
+    symmetric_band_nn = calc.TB_1D_nn(tnn, a, -k)
     
-    # output shape
-    assert result.shape == k.shape
+    assert np.allclose(band_nn, symmetric_band_nn, rtol=1e-5), "Energy band (1D nn) is not symmetric."
 
-    # output finiteness
-    assert np.all(np.isfinite(result))
-
-    # expected energy bands
-    if params[0] == 1:
-        expected = -2 * params[1] * np.cos(k * params[3])
-    elif params[0] == 2:
-        expected = -2 * params[1] * np.cos(k * params[3]) - 2 * params[2] * np.cos(2* k * params[3])
-    assert np.allclose(result, expected, rtol=1e-5), "Energy band does not match expected values."
-
-    # symmetry check: E(k) == E(-k)
-    assert np.allclose(result, calc.TB_1D(params, -k), rtol=1e-5), "Energy band is not symmetric."
-
-    # bounds check for nn & nnn
-    if params[0] == 1:
-        assert np.all(result >= -2 * params[1]), f"Energy band values are below expected minimum: {params}"
-        assert np.all(result <= 2 * params[1]), f"Energy band values exceed expected maximum: {params}"
-    elif params[0] == 2:
-        if params[2]/params[1]>0.25:
-            assert np.all(result >= -2 * params[1] - 2 * params[2]), f"Energy band values are below expected minimum: {params}"
-            assert np.all(result <= params[2] * ((params[1]/(2*params[2]))**2 + 2)), f"Energy band values exceed expected maximum: {params}"
-        elif params[2]/params[1]<=0.25:
-            assert np.all(result >= - 2 * params[1] - 2 * params[2]), f"Energy band values are below expected minimum: {params}"
-            assert np.all(result <= 2 * params[1] - 2 * params[2]), f"Energy band values exceed expected maximum: {params}"
-''' ----------------------------- '''
-
-
-def test_TB_1D_zero_tnn():
+def test_TB_1D_nnn_symmetry():
     '''
-    test that TD_1D() defines a good energy band.
-    tesing the behavior of the function when 'tnn' is zero.
-    Input:
-        none
-    Output:
-        none
+    test that TB_1D_nnn() defines a symmetric energy band by comparing it to the one generated with -k.
     '''
-    params = [1, 0.0, 0.1, 5.0, 100, 0.01, "lorentzian"]
-    k = np.linspace(-np.pi/params[3], np.pi/params[3] , params[4])
+    tnn = 1.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    band_nnn = calc.TB_1D_nnn(tnn, tnnn, a, k)
+    symmetric_band_nnn = calc.TB_1D_nnn(tnn, tnnn, a, -k)
+    
+    assert np.allclose(band_nnn, symmetric_band_nnn, rtol=1e-5), "Energy band (1D nnn) is not symmetric."
 
-    result = calc.TB_1D(params, k)
+def test_TB_1D_nn_boundaries():
+    '''
+    test that TD_1D_nn() defines an energy band which is contained in the expected boundaries.
+    '''
+    tnn = 1.0
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    result = calc.TB_1D_nn(tnn, a, k)
+
+    assert np.all(result >= -2 * tnn), f"Energy band values are below expected minimum: -2*{tnn}"
+    assert np.all(result <= 2 * tnn), f"Energy band values exceed expected maximum: 2*{tnn}"
+
+def test_TB_1D_nnn_boundaries_low_interaction():
+    '''
+    test that TD_1D_nnn() defines an energy band which is contained in the expected boundaries.
+    if tnnn < 0.25*tnn, the absolute maxima of the band are at k=±π/a
+    '''
+    tnn = 1.0
+    tnnn_low = 0.24 * tnn
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    result_low = calc.TB_1D_nnn(tnn, tnnn_low, a, k)
+
+    assert np.all(result_low >= - 2 * tnn - 2 * tnnn_low), f"Energy band values are below expected minimum: -2*{tnn}"
+    assert np.all(result_low <= 2 * tnn + 2 * tnnn_low), f"Energy band values exceed expected maximum: 2*{tnn}"
+
+def test_TB_1D_nnn_boundaries_high_interaction():
+    '''
+    test that TD_1D_nnn() defines an energy band which is contained in the expected boundaries.
+    if tnnn > 0.25*tnn, the absolute maxima of the band are shifted towards k=±π/2a
+    '''
+    tnn = 1.0
+    tnnn_high = 0.26 * tnn
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    result_high = calc.TB_1D_nnn(tnn, tnnn_high, a, k)
+
+    assert np.all(result_high >= - 2 * tnn - 2 * tnnn_high), f"Energy band values are below expected minimum: -2*{tnn}"
+    assert np.all(result_high <= 2 * tnn + 2 * tnnn_high), f"Energy band values exceed expected maximum: 2*{tnn}"
+
+def test_TB_1D_nn_zero_tnn():
+    '''
+    test that TD_1D_nn() defines a flat energy band when the hopping parameter 'tnn' is set to 0.
+    '''
+    tnn = 0.0
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+
+    result = calc.TB_1D_nn(tnn, a, k)
+
+    # energy values must be all zero
+    expected = np.zeros_like(k)
+    assert np.allclose(result, expected, rtol=1e-5), "Energy band is not zero when tnn is zero."
+
+def test_TB_1D_nnn_zero_tnn():
+    '''
+    test that TD_1D_nnn() defines a flat energy band when the hopping parameter 'tnn' is set to 0.
+    '''
+    tnn = 0.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+
+    result = calc.TB_1D_nnn(tnn, tnnn, a, k)
 
     # energy values must be all zero
     expected = np.zeros_like(k)
@@ -214,123 +194,133 @@ def test_TB_1D_zero_tnn():
 
 def test_TB_1D_zero_tnnn():
     '''
-    test that TD_1D() defines a good energy band.
-    tesing that the nn & nnn cases equate when 'tnnn' is zero.
-    Input:
-        none
-    Output:
-        none
+    test that, if next-neighbors hopping parameter 'tnnn' is set to 0, TB_1D_nn() and TB_1D_nnn() generate the same energy band.
     '''
-    params_nn = [1, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"] #nn case
-    params_nnn = [2, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"] #nnn case
-    k = np.linspace(-np.pi/params_nn[3], np.pi/params_nn[3] , params_nn[4])
+    tnn = 0.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    k = np.linspace(-np.pi/a, np.pi/a , N)
     
-    result_nn = calc.TB_1D(params_nn, k)
-    result_nnn = calc.TB_1D(params_nnn, k)
+    result_nn = calc.TB_1D_nn(tnn, a, k)
+    result_nnn = calc.TB_1D_nnn(tnn, tnnn, a, k)
     
     assert np.allclose(result_nn, result_nnn, rtol=1e-5), "Nnn case should collapse on nn case when tnnn is zero."
+''' ----------------------------- '''
 
 
 
 ''' --------testing TD_2D-------- '''
-@given(params=st.tuples(
-            st.integers(min_value=3, max_value=4),                    # case (3 for NN, 4 for NNN)
-            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 4)),  # tnn with 4 decimal places
-            st.floats(min_value=0, max_value=1).map(lambda x: round(x, 4)),     # tnnn/tnn (can be 0) with 4 decimal places
-            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 3)),  # a with 3 decimal places
-            st.integers(min_value=100, max_value=800),               # N
-            st.floats(min_value=0.001, max_value=0.999).map(lambda x: round(x, 3)), # width with 3 decimal places
-            st.sampled_from(["gaussian", "lorentzian"])))             # method
-def test_TB_2D(params):
+def test_TB_2D_nn_symmetry():
     '''
-    test that, after a randomic generation of legal parameters, TD_2D() defines a good energy band.
-    tesing the shape, finiteness, expected values, symmetry and higher and lower limits.
-    Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (3=nn, 4=nnn).
-            - params[1]: hopping parameter for nearest neighbors 'tnn'.
-            - params[2]: hopping parameter for next-nearest neighbors 'tnnn'.
-            - params[3]: lattice constant 'a'.
-            - params[4]: number of points 'N'.
-            - params[5]: width of the function approximating a Dirac's delta 'w'.
-            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.
-    Output:
-        none
+    test that TB_2D_nn() defines a symmetric energy band by comparing it to the one generated with -k.
     '''
-    kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
-    kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
-    
-    
-    params = list(params)  # convert tuple to list to allow modification
-    tnnn = params[2] * params[1] # tnnn goes now from 0 to tnn
-    params[2]=tnnn
-    result = calc.TB_2D(params, kx, ky)
-
-    # output shape
-    assert result.shape == kx.shape, "Output shape does not match kx array shape."
-
-    # output finiteness
-    assert np.all(np.isfinite(result)), "Energy band contains non-finite values."
-
-    # expected energy bands
-    if params[0] == 3:
-        expected = -2*params[1]*(np.cos(kx*params[3])+2*np.cos(kx*params[3]/2)*np.cos(ky*params[3]*np.sqrt(3)/2))
-    elif params[0] == 4:
-        expected = -2*params[1]*(np.cos(kx*params[3])+2*np.cos(kx*params[3]/2)*np.cos(ky*params[3]*np.sqrt(3)/2)) - 2*params[2]*(np.cos(ky*params[3]*np.sqrt(3))+2*np.cos(ky*params[3]*np.sqrt(3)/2)*np.cos(kx*params[3]*3/2))
-    assert np.allclose(result, expected, rtol=1e-5), "Energy band does not match expected values."
-
-    # symmetry check: E(kx, ky) == E(-kx, -ky)
-    assert np.allclose(result, calc.TB_2D(params, -kx, -ky), rtol=1e-5), "Energy band is not symmetric."
-
-def test_TB_2D_nnn_bounds():
-    '''
-    test that TD_2D() defines a good energy band.
-    tesing that the nnn case respect the modelled higher and lower energy value along the high symmetry point.
-    Input:
-        none
-    Output:
-        none
-    '''
-    params = [4, 1.0, 0.126, 5.0, 500, 0.01, "lorentzian"]
+    tnn = 1.0
+    a = 1.0
+    N = 100
     kx, ky = np.meshgrid(
-        np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4]),
-        np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4]))
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    band_nn = calc.TB_2D_nn(tnn, a, kx, ky)
+    symmetric_band_nn = calc.TB_2D_nn(tnn, a, -kx, -ky)
 
-    #M point has higher energy than K point
-    result = calc.TB_2D(params, kx, ky)
-    min_energy = - 6 * (params[1] + params[2])
-    max_energy = 2 * (params[1] + params[2])
+    assert np.allclose(band_nn, symmetric_band_nn, rtol=1e-5), "Energy band (2D nn) is not symmetric."
 
-    assert np.all(result >= min_energy), f"Energy band values are below expected minimum (M>K): {params}"
-    assert np.all(result <= max_energy), f"Energy band values exceed expected maximum (M>K): {params}"
-
-
-    #K point has higher energy than M point
-    params[2]=0.124
-    result = calc.TB_2D(params, kx, ky)
-    min_energy = - 6 * (params[1] + params[2])
-    max_energy = 3 * (params[1] - 2 * params[2])
-
-    assert np.all(result >= min_energy), f"Energy band values are below expected minimum (K>M): {params}"
-    assert np.all(result <= max_energy), f"Energy band values exceed expected maximum (K>M: {params}"
-
-def test_TB_2D_zero_tnn():
+def test_TB_2D_nnn_symmetry():
     '''
-    test that TD_2D() defines a good energy band.
-    tesing the behavior of the function when 'tnn' is zero.
-    Input:
-        none
-    Output:
-        none
+    test that TB_2D_nnn() defines a symmetric energy band by comparing it to the one generated with -k.
     '''
-    params = [3, 0.0, 0.1, 5.0, 100, 0.01, "lorentzian"]
+    tnn = 1.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
     kx, ky = np.meshgrid(
-        np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4]),
-        np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4]))
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    band_nnn = calc.TB_2D_nnn(tnn, tnnn, a, kx, ky)
+    symmetric_band_nnn = calc.TB_2D_nnn(tnn, tnnn, a, -kx, -ky)
 
-    result = calc.TB_2D(params, kx, ky)
+    assert np.allclose(band_nnn, symmetric_band_nnn, rtol=1e-5), "Energy band (2D nnn) is not symmetric."
+
+def test_TB_2D_nn_boundaries():
+    '''
+    test that TD_2D_nn() defines an energy band which is contained in the expected boundaries.
+    '''
+    tnn = 1.0
+    a = 1.0
+    N = 100
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    result = calc.TB_2D_nn(tnn, a, kx, ky)
+
+    assert np.all(result >= -6 * tnn), f"Energy band (2D nn) values are below expected minimum: -6*{tnn}"
+    assert np.all(result <= 3 * tnn), f"Energy band (2D nn) values exceed expected maximum: 3*{tnn}"
+
+def test_TB_2D_nnn_boundaries_low_interaction():
+    '''
+    test that TD_2D_nn() defines an energy band which is contained in the expected boundaries.
+    if tnnn < 0.125*tnn, the absolute maximum of the band is at the K point
+    '''
+    tnn = 1.0
+    tnnn_low = 0.124 * tnn
+    a = 1.0
+    N = 100
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    result_low = calc.TB_2D_nnn(tnn, tnnn_low, a, kx, ky)
+
+    assert np.all(result_low >= - 6 * tnn - 6 * tnnn_low), f"Energy band (2D nnn) values are below expected minimum: -6*{tnn}-6*{tnnn_low}"
+    assert np.all(result_low <= 3 * tnn - 6 * tnnn_low), f"Energy band (2D nnn) values exceed expected maximum: 3*{tnn}-6*{tnnn_low}"
+
+def test_TB_2D_nnn_boundaries_high_interaction():
+    '''
+    test that TD_2D_nn() defines an energy band which is contained in the expected boundaries.
+    if tnnn > 0.125*tnn, the absolute maximum of the band is at the M point
+    '''
+    tnn = 1.0
+    tnnn_high = 0.126 * tnn
+    a = 1.0
+    N = 100
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    result_high = calc.TB_2D_nnn(tnn, tnnn_high, a, kx, ky)
+
+    assert np.all(result_high >= - 6 * tnn - 6 * tnnn_high), f"Energy band (2D nnn) values are below expected minimum: -6*{tnn}-6*{tnnn_high}"
+    assert np.all(result_high <= 2 * tnn + 2 * tnnn_high), f"Energy band (2D nnn) values exceed expected maximum: 2*{tnn}+2*{tnnn_high}"
+
+def test_TB_2D_nn_zero_tnn():
+    '''
+    test that TD_2D_nn() defines a flat energy band when the hopping parameter 'tnn' is set to 0.
+    '''
+    tnn = 0.0
+    a = 1.0
+    N = 100
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+
+    result = calc.TB_2D_nn(tnn, a, kx, ky)
+
+    # energy values must be all zero
+    expected = np.zeros_like(kx)
+    assert np.allclose(result, expected, rtol=1e-5), "Energy band is not zero when tnn is zero."
+
+def test_TB_2D_nnn_zero_tnn():
+    '''
+    test that TD_2D_nnn() defines a flat energy band when the hopping parameter 'tnn' is set to 0.
+    '''
+    tnn = 0.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+
+    result = calc.TB_2D_nnn(tnn, tnnn, a, kx, ky)
 
     # energy values must be all zero
     expected = np.zeros_like(kx)
@@ -338,213 +328,297 @@ def test_TB_2D_zero_tnn():
 
 def test_TB_2D_zero_tnnn():
     '''
-    test that TD_2D() defines a good energy band.
-    tesing that the nn & nnn cases equate when 'tnnn' is zero.
-    Input:
-        none
-    Output:
-        none
+    test that, if next-neighbors hopping parameter 'tnnn' is set to 0, TB_2D_nn() and TB_2D_nnn() generate the same energy band.
     '''
-    params_nn = [3, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NN case
-    params_nnn = [4, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NNN case
+    tnn = 1.0
+    tnnn = 0.0
+    a = 1.0
+    N = 100
     kx, ky = np.meshgrid(
-        np.linspace(-(4*np.pi)/params_nn[3], (4*np.pi)/params_nn[3], params_nn[4]),
-        np.linspace(-(4*np.pi)/params_nn[3], (4*np.pi)/params_nn[3], params_nn[4]))
-
-    result_nn = calc.TB_2D(params_nn, kx, ky)
-    result_nnn = calc.TB_2D(params_nnn, kx, ky)
-
-    assert np.allclose(result_nn, result_nnn, rtol=1e-5), ("nnn case should collapse to nn case when tnnn is zero.")
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    
+    result_nn = calc.TB_2D_nn(tnn, a, kx, ky)
+    result_nnn = calc.TB_2D_nnn(tnn, tnnn, a, kx, ky)
+    
+    assert np.allclose(result_nn, result_nnn, rtol=1e-5), "Nnn case should collapse on nn case when tnnn is zero."
 ''' ----------------------------- '''
 
 
+
 ''' --------testing DOS_1D-------- '''
-@given(params=st.tuples(
-            st.integers(min_value=1, max_value=2),                    # case (1 or 2)
-            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 4)),  # tnn with 4 decimal places
-            st.floats(min_value=0, max_value=1).map(lambda x: round(x, 4)),     # tnnn/tnn (can be 0) with 4 decimal places
-            st.floats(min_value=0.1, max_value=10).map(lambda x: round(x, 3)),  # a with 3 decimal places
-            st.integers(min_value=100, max_value=800),               # N
-            st.floats(min_value=0.001, max_value=0.999).map(lambda x: round(x, 3)), # width with 3 decimal places
-            st.sampled_from(["gaussian", "lorentzian"])))             # method
-def test_DOS_1D(params):
+def test_DOS_1D_nn_length():
     '''
-    test that, after a randomic generation of legal parameters, DOS_1D() defines a good density of states.
-    tesing the length, finiteness and normalization.
-    Input:
-        params : list
-            - params[0]: case for the 1D & 2D calculation (1=nn, 2=nnn).
-            - params[1]: hopping parameter for nearest neighbors 'tnn'.
-            - params[2]: hopping parameter for next-nearest neighbors 'tnnn'.
-            - params[3]: lattice constant 'a'.
-            - params[4]: number of points 'N'.
-            - params[5]: width of the function approximating a Dirac's delta 'w'.
-            - params[6]: string specifying the approximation method 'gaussian' or 'lorentzian'.
-    Output:
-        none
-    '''
-    k = np.linspace(-np.pi/params[3], np.pi/params[3] , params[4])
-    params = list(params)  # convert tuple to list to allow modification
-    tnnn = params[2] * params[1] # tnnn goes now from 0 to tnn
-    params[2]=tnnn
-    energy_band = calc.TB_1D(params, k)
+    test that in the nn case DOS_1D() outputs, dos_range and dos_values, have the expected length, corresponding to the number of lattice points N.
+    '''  
+    tnn = 1.0
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    band = calc.TB_1D_nn(tnn, a, k)
+    dos_range, dos_values = calc.DOS_1D(tnn, N, w, method, band)
     
-    dos_range, dos_values = calc.DOS_1D(params, energy_band)
+    assert len(dos_range) == N, "DOS range length does not match expected (1D nn)."
+    assert len(dos_values) == N, "DOS values length does not match expected (1D nn)."
 
-    # output shape
-    assert len(dos_range) == params[4], "DOS range length does not match expected."
-    assert len(dos_values) == params[4], "DOS values length does not match expected."
+def test_DOS_1D_nnn_length():
+    '''
+    test that in the nnn case DOS_1D() outputs, dos_range and dos_values, have the expected length, corresponding to the number of lattice points N.
+    '''  
+    tnn = 1.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    band = calc.TB_1D_nnn(tnn, tnnn, a, k)
+    dos_range, dos_values = calc.DOS_1D(tnn, N, w, method, band)
+    
+    assert len(dos_range) == N, "DOS range length does not match expected (1D nnn)."
+    assert len(dos_values) == N, "DOS values length does not match expected (1D nnn)."
 
-    # output finiteness
-    assert np.all(np.isfinite(dos_values)), "DOS values contain non-finite values."
-
-    # output normalization
+def test_DOS_1D_normalization():
+    '''
+    test that DOS_1D() defines a Density of States which is normalized to 1.
+    '''
+    tnn = 1.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    band = calc.TB_1D_nnn(tnn, tnnn, a, k)
+    dos_range, dos_values = calc.DOS_1D(tnn, N, w, method, band)
+    
     assert np.isclose(np.trapz(dos_values, dos_range), 1.0, rtol=1e-3), "DOS normalization failed."
     
 def test_DOS_1D_zero_tnn():
     '''
-    test that DOS_1D() defines a good density of states.
-    tesing the behavior of the function when 'tnn' is zero.
-    Input:
-        none
-    Output:
-        none
+    test that DOS_1D() defines a Density of States which is 0 everywhere if tnn is set to 0.
     '''
-    params = [1, 0.0, 0.1, 5.0, 100, 0.01, "lorentzian"]
-    k = np.linspace(-np.pi/params[3], np.pi/params[3] , params[4])
-
-    energy_band = calc.TB_1D(params, k)
-    dos_range, dos_values = calc.DOS_1D(params, energy_band)
-
-    # energy values must be all zero
+    tnn = 0.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    k = np.linspace(-np.pi/a, np.pi/a , N)
+    band = calc.TB_1D_nnn(tnn, tnnn, a, k)
+    dos_range, dos_values = calc.DOS_1D(tnn, N, w, method, band)
+    
     expected = np.zeros_like(k)
     assert np.allclose(dos_values, expected, rtol=1e-5), "Energy band is not zero when tnn is zero."
-
-def test_DOS_1D_zero_tnnn():
-    '''
-    test that DOS_1D() defines a good density of states.
-    tesing that the nn & nnn cases equate when 'tnnn' is zero.
-    Input:
-        none
-    Output:
-        none
-    '''
-    params_nn = [1, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NN case
-    params_nnn = [2, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NNN case
-    k = np.linspace(-np.pi/params_nn[3], np.pi/params_nn[3] , params_nn[4])
-
-    energy_band_nn = calc.TB_1D(params_nn, k)
-    dos_range_nn, dos_values_nn = calc.DOS_1D(params_nn, energy_band_nn)
-
-    energy_band_nnn = calc.TB_1D(params_nnn, k)
-    dos_range_nnn, dos_values_nnn = calc.DOS_1D(params_nnn, energy_band_nnn)
-
-    assert np.allclose(dos_values_nn, dos_values_nnn, rtol=1e-5), ("nnn case should collapse to nn case when tnnn is zero.")
-
 ''' ----------------------------- '''
 
 
 ''' --------testing DOS_2D-------- '''
-def test_DOS_2D_nn():
+def test_DOS_2D_nn_length():
     '''
-    test that DOS_2D() defines a good density of states (nn case).
-    tesing the length, finiteness and normalization.
-    Input:
-        none
-    Output:
-        none
+    test that in the nn case DOS_2D() outputs, dos_range and dos_values, have the expected length, corresponding to the number of lattice points N.
+    '''  
+    tnn = 1.0
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    band = calc.TB_2D_nn(tnn, a, kx, ky)
+    dos_range, dos_values = calc.DOS_2D(tnn, N, w, method, band)
+    
+    assert len(dos_range) == N, "DOS range length does not match expected (2D nn)."
+    assert len(dos_values) == N, "DOS values length does not match expected (2D nn)."
+
+def test_DOS_2D_nnn_length():
     '''
-    params = [3, 2.071, 0.999, 1.721, 500, 0.01, "gaussian"] #2D nn case with gaussian approximation
-    kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
-    kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
-
-    energy_band = calc.TB_2D(params, kx, ky)
-    dos_range, dos_values = calc.DOS_2D(params, energy_band)
-
-    # output shape
-    assert len(dos_range) == params[4], "DOS range length does not match expected."
-    assert len(dos_values) == params[4], "DOS values length does not match expected."
-
-    # output finiteness
-    assert np.all(np.isfinite(dos_values)), "DOS values contain non-finite values."
-
-    # output normalization
+    test that in the nnn case DOS_2D() outputs, dos_range and dos_values, have the expected length, corresponding to the number of lattice points N.
+    '''  
+    tnn = 1.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    band = calc.TB_2D_nnn(tnn, tnnn, a, kx, ky)
+    dos_range, dos_values = calc.DOS_2D(tnn, N, w, method, band)
+    
+    assert len(dos_range) == N, "DOS range length does not match expected (2D nnn)."
+    assert len(dos_values) == N, "DOS values length does not match expected (2D nnn)."
+    
+def test_DOS_2D_normalization():
+    '''
+    test that DOS_2D() defines a Density of States which is normalized to 1.
+    '''
+    tnn = 1.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    band = calc.TB_2D_nnn(tnn, tnnn, a, kx, ky)
+    dos_range, dos_values = calc.DOS_2D(tnn, N, w, method, band)
+    
     assert np.isclose(np.trapz(dos_values, dos_range), 1.0, rtol=1e-3), "DOS normalization failed."
-
-def test_DOS_2D_nnn():
-    '''
-    test that DOS_2D() defines a good density of states (nnn case).
-    tesing the length, finiteness and normalization.
-    Input:
-        none
-    Output:
-        none
-    '''
-    params = [4, 0.192, 0.126, 0.555, 750, 0.03, "lorentzian"] #2D nnn case with lorentzian approximation
-    kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
-    kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
-
-    energy_band = calc.TB_2D(params, kx, ky)
-    dos_range, dos_values = calc.DOS_2D(params, energy_band)
-
-    # output shape
-    assert len(dos_range) == params[4], "DOS range length does not match expected."
-    assert len(dos_values) == params[4], "DOS values length does not match expected."
-
-    # output finiteness
-    assert np.all(np.isfinite(dos_values)), "DOS values contain non-finite values."
-
-    # output normalization
-    assert np.isclose(np.trapz(dos_values, dos_range), 1.0, rtol=1e-3), "DOS normalization failed."
-
-
+    
 def test_DOS_2D_zero_tnn():
     '''
-    test that DOS_2D() defines a good density of states.
-    tesing the behavior of the function when 'tnn' is zero.
-    Input:
-        none
-    Output:
-        none
+    test that DOS_2D() defines a Density of States which is 0 everywhere if tnn is set to 0.
     '''
-    params = [3, 0.0, 0.1, 5.0, 100, 0.01, "lorentzian"]
-    kx_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    ky_start = np.linspace(-(4*np.pi)/params[3], (4*np.pi)/params[3], params[4])
-    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params[3])
-    kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
-
-    energy_band = calc.TB_2D(params, kx, ky)
-    dos_range, dos_values = calc.DOS_2D(params, energy_band)
-
-    # energy values must be all zero
-    expected = np.zeros_like(kx_start)
+    tnn = 0.0
+    tnnn = 0.5 * tnn
+    a = 1.0
+    N = 100
+    w = 0.01
+    method = 'lorentzian'
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    band = calc.TB_2D_nnn(tnn, tnnn, a, kx, ky)
+    dos_range, dos_values = calc.DOS_2D(tnn, N, w, method, band)
+    
+    expected = np.zeros_like(kx)
     assert np.allclose(dos_values, expected, rtol=1e-5), "Energy band is not zero when tnn is zero."
-
-def test_DOS_2D_zero_tnnn():
-    '''
-    test that DOS_2D() defines a good density of states.
-    tesing that the nn & nnn cases equate when 'tnnn' is zero.
-    Input:
-        none
-    Output:
-        none
-    '''
-    params_nn = [3, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NN case
-    params_nnn = [4, 1.0, 0.0, 5.0, 100, 0.01, "lorentzian"]  # NNN case
-    kx_start = np.linspace(-(4*np.pi)/params_nn[3], (4*np.pi)/params_nn[3], params_nn[4])
-    ky_start = np.linspace(-(4*np.pi)/params_nn[3], (4*np.pi)/params_nn[3], params_nn[4])
-    hexagon = calc.hexagonal_contour(kx_start, ky_start, (4*np.pi)/params_nn[3])
-    kx, ky = np.meshgrid(kx_start[hexagon],ky_start[hexagon])
-
-    energy_band_nn = calc.TB_2D(params_nn, kx, ky)
-    dos_range_nn, dos_values_nn = calc.DOS_2D(params_nn, energy_band_nn)
-
-    energy_band_nnn = calc.TB_2D(params_nnn, kx, ky)
-    dos_range_nnn, dos_values_nnn = calc.DOS_2D(params_nnn, energy_band_nnn)
-
-    assert np.allclose(dos_values_nn, dos_values_nnn, rtol=1e-5), ("nnn case should collapse to nn case when tnnn is zero.")
 ''' ----------------------------- '''
+
+
+
+
+''' --------testing gaussian_weights-------- '''
+def test_gaussian_weights_empty_band():
+    '''
+    test that gaussian_weights() returns an empty array if the energy band is empty
+    '''
+    w = 0.01
+    E = 1.0
+    E_k = np.array([])
+    expected = np.array([])
+    assert np.array_equal(calc.gaussian_weights(w, E, E_k), expected), "Function defines non-empty weigth array when it's given empty energy band"
+
+def test_gaussian_weights_zero_band():
+    '''
+    test that gaussian_weights() returns the expected array of weights if the energy band is all equal to zero
+    '''
+    N = 100
+    w = 0.01
+    E = 1.0
+    E_k = np.zeros(N)
+    result = calc.gaussian_weights(w, E, E_k)
+    expected = np.full(N, np.exp(-(E ** 2) / (w ** 2)))
+    
+    assert np.array_equal(result, expected), "Function defines wrong weigth array when it's given zero-like energy band"
+''' ---------------------------------------- '''
+
+''' --------testing lorentzian_weights-------- '''
+def test_lorentzian_weights_empty_band():
+    '''
+    test that lorentzian_weights() returns an empty array if the energy band is empty
+    '''
+    w = 0.01
+    E = 1.0
+    E_k = np.array([])
+    expected = np.array([])
+    assert np.array_equal(calc.lorentzian_weights(w, E, E_k), expected), "Function defines non-empty weigth array when it's given empty energy band"
+    
+def test_lorentzian_weights_zero_band():
+    '''
+    test that lorentzian_weights() returns the expected array of weights if the energy band is all equal to zero
+    '''
+    N = 100
+    w = 0.01
+    E = 1.0
+    E_k = np.zeros(N)
+    result = calc.lorentzian_weights(w, E, E_k)
+    expected = np.full(N, 1 / (E ** 2 + w ** 2))
+    
+    assert np.array_equal(result, expected), "Function defines wrong weigth array when it's given zero-like energy band"
+''' ---------------------------------------- '''
+
+
+
+''' --------testing hexagonal_contour-------- '''
+def test_hexagonal_contour_size_error():
+    '''
+    test that hexagonal_contour() correctly raise the ValueError if the input 'size' is lower than 0    
+    '''
+    a = 1.0
+    N = 100
+    size = -1
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    
+    with pytest.raises(ValueError, match="Error when calling function hexagonal_contour()."):
+        calc.hexagonal_contour(a, size, kx, ky)
+        
+def test_hexagonal_contour_boundaries():
+    '''
+    test that when applying hexagonal_contour() on the 2D wave vector components, the required hexagonal boundaries are respected.
+    '''
+    a = 1.0
+    N = 100
+    size = 1
+    kx, ky = np.meshgrid(
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N),
+        np.linspace(-(4*np.pi)/a, (4*np.pi)/a, N))
+    hexagon = calc.hexagonal_contour(a, size, kx, ky)    
+    kx_grid, ky_grid = np.meshgrid(kx[hexagon], ky[hexagon])
+    
+    assert np.all(ky_grid >= -size*(4 * np.pi)/a), f"2D wave vector x component is below expected minimum: -{size}*(4)π/a"
+    assert np.all(ky_grid <= size*(4 * np.pi)/a), f"2D wave vector x component is above expected maximum: {size}*(4)π/a"
+''' ----------------------------------------- '''
+
+
+''' --------testing wave_vectors_builder-------- '''
+def test_wave_vectors_builder_boundaries():
+    '''
+    test that wave_vectors_builder defines wave vectors with the required length   
+    '''
+    a = 1.0
+    N = 100
+    size = 1
+    k, kx_grid, ky_grid = calc.wave_vectors_builder(a, N, size)
+
+    assert np.all(k >= -np.pi/a), "1D wave vector values are below expected minimum: -π/a"
+    assert np.all(k <= np.pi/a), "1D wave vector values are above expected maximum: π/a"
+    
+    assert np.all(kx_grid >= -size*(4*np.pi)/a), f"2D wave vector x component values are below expected minimum: -{size}*4*π/a"
+    assert np.all(kx_grid <= size*(4*np.pi)/a), f"1D wave vector k values are above expected maximum: {size}*4*π/a"
+
+    assert np.all(ky_grid >= -size*(8*np.pi)/(a*np.sqrt(3))), f"2D wave vector x component values are below expected minimum: -{size}*(8*π)/(a*sqrt(3))"
+    assert np.all(ky_grid <= size*(8*np.pi)/(a*np.sqrt(3))), f"2D wave vector y component values are above expected maximum: {size}*(8*π)/(a*sqrt(3))"
+''' ----------------------------------------- '''
+
+
+''' --------testing high_symmetry_path-------- '''
+def test_high_symmetry_path():
+    '''
+    test that high_symmetry_path() generates the required path by checking the 4 high symmetry points (Γ - K - M - Γ) located at the known positions    
+    '''
+    a = 1.0
+    N = 100
+    kx_path, ky_path = calc.high_symmetry_path(a, N)
+
+    assert kx_path[0] == 0, "Gamma point has wrong x coordinate when calling high_symmetry_path()"
+    assert ky_path[0] == 0, "Gamma point has wrong x coordinate when calling high_symmetry_path()"
+
+    assert kx_path[N-1] == 4 * np.pi / (3 * a), "K point has wrong x coordinate when calling high_symmetry_path()"
+    assert ky_path[N-1] == 0, "K point has wrong x coordinate when calling high_symmetry_path()"
+
+    assert kx_path[2*N-1] == np.pi / a, "M point has wrong x coordinate when calling high_symmetry_path()"
+    assert ky_path[2*N-1] == np.pi / (np.sqrt(3) * a), "M point has wrong x coordinate when calling high_symmetry_path()"
+
+    assert kx_path[3*N-1] == 0, "Gamma point has wrong x coordinate when calling high_symmetry_path()"
+    assert ky_path[3*N-1] == 0, "Gamma point has wrong x coordinate when calling high_symmetry_path()"
+''' ----------------------------------------- '''
+
