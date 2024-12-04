@@ -4,7 +4,8 @@ It studies a 1D system (linear lattice) and a 2D system (triangular lattice), fo
 In the following section is reported a guide on how to download, chose the working parameters and run the code. Additionally, a last section with the theoretical background on the Tight Binding model, and in particular on triangular lattice, is reported.
 
 
-#Download & Run the Code
+# Download & Run the Code:
+
 In order to use the code, one needs first to clone the git repository:
 ```
 git clone https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics.git
@@ -18,7 +19,8 @@ Parameters.ini already contains a set of valid parameters to run directly the co
 Tight_Binding.py will check & print the working parameters, calculate the 4 energy bands and Density of States and plot them (also it will plot the color map for the 2D systems). At last, it will create a folder called "Images" in the same repository as itself, and save as .pdf all the plotted graphs. After ending the calculation and saving it will print the time interval needed for the code.
 
 
-#Structure of the Code
+# Structure of the Code:
+
 The code is subdivided into 5 files. 
 Inside calculations.py are contained all the functions needed for the actual calculation of energy bands, DOS as well as the check on the working parameters.
 As the name suggest, plots.py contains instead all the functions needed to plot the calculated bands & DOS, as well as the function that saves them.
@@ -27,7 +29,8 @@ Tight_Binding.py corresponds to the main of the project: after reading the worki
 At last, the file testing.py contain multiple unittest for each and every function in calculations.py.
 
 
-#Theoretical Framework of Tight Binding Model
+# Theoretical Framework of Tight Binding Model:
+
 The calculation uses the famous Tight Binding model, in which one can build the hamiltonian of a system by considering the sum between the atomic term $\hat{H}_0$ and the hopping term $\hat{T}$. These two terms can be expressed as follows:
 
 ```math
