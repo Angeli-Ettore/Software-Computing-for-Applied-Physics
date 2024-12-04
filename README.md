@@ -1,8 +1,34 @@
-# Tight Binding Calculation for 1D & 2D systems:
-The code calculate the energy band and Density of States for two different systems, in two distinct configurations. In particular, it studies both a 1D and a 2D system.
-In the 1D case each k-state is equidistant, and the First Brillouin Zone is defined by the lattice parameter 'a'.
-In the 2D case, I consider a triangular lattice in order to highlight the effect of its symmetry. A triangular lattice has in fact an hexagonal FBZ.
-The calculation uses as model the famous Tight Binding model, in which one can build the hamiltonian of a system by considering the sum between the atomic term $\hat{H}_0$ and the hopping term $\hat{T}$. These two terms can be expressed as follows:
+## Tight Binding Calculation for 1D & 2D Systems:
+The code calculate the energy band and Density of States for two different systems, in two distinct configurations. 
+It studies a 1D system (linear lattice) and a 2D system (triangular lattice), for nearest neighbor interaction & next-nearest neighbor interaction.
+In the following section is reported a guide on how to download, chose the working parameters and run the code. Additionally, a last section with the theoretical background on the Tight Binding model, and in particular on triangular lattice, is reported.
+
+
+#Download & Run the Code
+In order to use the code, one needs first to clone the git repository:
+```
+git clone https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics.git
+```
+The required packages are contained in the 'requirements.txt' file. One can install them by:
+```
+pip install -r requirements.txt
+```
+To effectively run the code, one needs to modify as wanted the set of parameters in the file parameters.ini, then run the file Tight_Binding.py, which start the calculation.
+Parameters.ini already contains a set of valid parameters to run directly the code.
+Tight_Binding.py will check & print the working parameters, calculate the 4 energy bands and Density of States and plot them (also it will plot the color map for the 2D systems). At last, it will create a folder called "Images" in the same repository as itself, and save as .pdf all the plotted graphs. After ending the calculation and saving it will print the time interval needed for the code.
+
+
+#Structure of the Code
+The code is subdivided into 5 files. 
+Inside calculations.py are contained all the functions needed for the actual calculation of energy bands, DOS as well as the check on the working parameters.
+As the name suggest, plots.py contains instead all the functions needed to plot the calculated bands & DOS, as well as the function that saves them.
+The file parameters.ini contains the working parameters, which are editable by the user.
+Tight_Binding.py corresponds to the main of the project: after reading the working parameters, call the functions that calculate the bands & DOS and the ones that plot & saves them.
+At last, the file testing.py contain multiple unittest for each and every function in calculations.py.
+
+
+#Theoretical Framework of Tight Binding Model
+The calculation uses the famous Tight Binding model, in which one can build the hamiltonian of a system by considering the sum between the atomic term $\hat{H}_0$ and the hopping term $\hat{T}$. These two terms can be expressed as follows:
 
 ```math
 \hat{H} = \hat{H}_0 + \hat{T} = \sum_{\vec{R}_i} \epsilon_0 |\vec{R}_i\rangle \langle\vec{R}_i| - t \sum_{\vec{R}_i} \sum_{\vec{r}_j} |\vec{R}_i\rangle \langle\vec{R}_i + \vec{r}_j|
@@ -74,14 +100,4 @@ g(\epsilon)_{lorentzian} = \sum_{\vec{k}} \frac{w}{\pi[(\epsilon - \epsilon_{\ve
 g(\epsilon)_{gaussian} = \sum_{\vec{k}} \frac{1}{w\sqrt{2\pi}} e^{\frac{(\epsilon - \epsilon_{\vec{k}})^2}{2w^2}}
 ```
 
-The code allows an user to play with various parameters; the two hopping parameters $t_{nn}$ & $t_{nnn}$, the lattice parameter $a$ and number of lattice points $N$, and the method to approximate the Dirac's delta, along with the width of the chosen function $w$. When given this set of working parameter, it compute the energy bands and Density of States for the 4 distinct cases and plot the results. In particular, for the **2D** case, it plots a color map of the energy band, along with a specific section of the band, that follow the high symmetry path $\Gamma -> K -> M -> \Gamma$. At last, the code generate a folder called "Images" in the same repository where the code is, with all the generated plots.
-
-In order to use the code, one needs to clone this repository:
-```
-git clone https://github.com/Angeli-Ettore/Software-Computing-for-Applied-Physics.git
-```
-The required packages are contained in the 'requirements' file. One can install them by:
-```
-pip install -r requirements.txt
-```
-Once everything is set up, by opening the file 'Tight_Binding.py' and inserting your favorite parameters, the code will calculate all the bands and DOSs.
+The code allows an user to play with various parameters; the two hopping parameters $t_{nn}$ & $t_{nnn}$, the lattice parameter $a$ and number of lattice points $N$, and the method to approximate the Dirac's delta, along with the width of the chosen function $w$. When given this set of working parameter, it compute the energy bands and Density of States for the 4 distinct cases and plot the results. In particular, for the **2D** case, it plots a color map of the energy band, along with a specific section of the band, that follow the high symmetry path $\Gamma -> K -> M -> \Gamma$.
